@@ -21,7 +21,7 @@ Code):
 
 **Note:** We strongly recommend reading our related article [CAN bus reverse engineering with AI](https://www.csselectronics.com/pages/can-bus-reverse-engineering-ai-llm-claude).
 
-<video src="https://cdn.shopify.com/videos/c/o/v/e384c5a75b7943e681dcbad2d10e230a.mp4" autoplay loop muted playsinline width="100%"></video>
+[![Watch the CAN bus reverse engineering demo](docs/vision-reference-demo.png)](https://cdn.shopify.com/videos/c/o/v/e384c5a75b7943e681dcbad2d10e230a.mp4)
 
 
 ## Recommended hardware
@@ -52,7 +52,7 @@ The below is our recommended setup for new Claude Code users:
 
 Plug the CANsub into your computer (USB) and into the vehicle's OBD2 port using the
 OBD2-DB9 adapter cable. Start the engine (or set the ignition on) so there's live
-CAN traffic to capture. We recommend verifying via [webCAN](https://www.csselectronics.com/pages/webcan-can-bus-streaming-software-browser) that you can stream raw proprietary CAN bus data before proceeding. If not, you may need to consider a [contactless CAN reader](https://www.csselectronics.com/products/contactless-can-bus-reader-adapter). 
+CAN traffic to capture. We recommend verifying via [webCAN](https://www.csselectronics.com/pages/webcan-can-bus-streaming-software-browser) that you can stream raw proprietary CAN bus data before proceeding. If not, consider our [contactless CAN reader](https://www.csselectronics.com/products/contactless-can-bus-reader-adapter). 
 
 ## Try it
 
@@ -87,11 +87,11 @@ decoding-output/
 ```
 
 Once you've decoded several signals, ask Claude to merge them into one
-application-wide DBC (it uses the **combine-dbc** skill):
+application DBC (using the **combine-dbc** skill):
 
 > Combine the decoded DBCs for mercedes-e350 into a single DBC.
 
-This produces `decoding-output/<application>/<application>.dbc`. You can then load
-that combined DBC in [webCAN](https://www.csselectronics.com/pages/webcan-can-bus-streaming-software-browser)
+This produces `decoding-output/<application>/<application>.dbc`. You can load
+this combined DBC in [webCAN](https://www.csselectronics.com/pages/webcan-can-bus-streaming-software-browser)
 and stream live from your CANsub to see your reverse-engineered signals decoded in
 real time - a final, live confirmation of the results.
