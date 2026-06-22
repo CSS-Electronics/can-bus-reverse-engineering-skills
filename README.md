@@ -1,6 +1,6 @@
 # CAN bus reverse engineering skills
 
-This repo contains [Claude Code](https://www.claude.com/claude-code) skills that can help you reverse engineer raw CAN bus data into decoding rules stored as DBC files. 
+This repo contains [Claude Code](https://www.claude.com/claude-code) skills that help you reverse engineer raw CAN bus data into decoding rules stored as DBC files. 
 
 Specifically, the skills help you leverage AI/LLM tools like Claude Code and [python-can](https://www.csselectronics.com/pages/python-can-usb-serial-api-stream) scripts to identify which CAN ID and data bits encode a
 real-world value (speed, RPM, state of charge, ...), work out its start bit,
@@ -86,7 +86,7 @@ decoding-output/
     <application>.dbc                     the combined DBC across all signals
 ```
 
-Once you've decoded several signals, ask Claude to merge them into one
+If you've decoded several signals, ask Claude to merge them into one
 application DBC (using the **combine-dbc** skill):
 
 > Combine the decoded DBCs for mercedes-e350 into a single DBC.
@@ -95,3 +95,9 @@ This produces `decoding-output/<application>/<application>.dbc`. You can load
 this combined DBC in [webCAN](https://www.csselectronics.com/pages/webcan-can-bus-streaming-software-browser)
 and stream live from your CANsub to see your reverse-engineered signals decoded in
 real time - a final, live confirmation of the results.
+
+## License and attribution
+
+These skills are fully open source under the [MIT License](LICENSE) - you are free to use, modify and distribute them in your own projects.
+
+If you use them in your projects, videos or blog posts, we'd appreciate a reference to our article: [CAN bus reverse engineering with AI](https://www.csselectronics.com/pages/can-bus-reverse-engineering-ai-llm-claude).
