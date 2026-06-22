@@ -1,0 +1,888 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "CANsub REST API.",
+    "version": "02.00",
+    "description": "CANsub REST API for configuration and monitoring."
+  },
+  "servers": [
+    {
+      "url": "https://{device_id}-usb.local",
+      "description": "USB connection.",
+      "variables": {
+        "device_id": {
+          "default": "aabbccdd",
+          "description": "8-digit hexadecimal device ID shown on the device display & label (e.g. aabbccdd)."
+        }
+      }
+    },
+    {
+      "url": "https://{device_id}-eth.local",
+      "description": "Ethernet connection.",
+      "variables": {
+        "device_id": {
+          "default": "aabbccdd",
+          "description": "8-digit hexadecimal device ID shown on the device display & label (e.g. aabbccdd)."
+        }
+      }
+    }
+  ],
+  "security": [],
+  "paths": {
+    "/api/version": {
+      "get": {
+        "summary": "Get API version",
+        "description": "Returns the current version of the REST API.",
+        "responses": {
+          "200": {
+            "description": "API Version.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "01.23"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/api/info": {
+      "get": {
+        "summary": "Get device information",
+        "description": "Returns general device information.",
+        "responses": {
+          "200": {
+            "description": "Device information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Device ID as a 8-digit hexadecimal value."
+                    },
+                    "hw_ver": {
+                      "type": "string",
+                      "description": "Hardware version with format \"xx.yy\"."
+                    },
+                    "fw_ver": {
+                      "type": "string",
+                      "description": "Firmware version with format \"xx.yy.zz\"."
+                    },
+                    "mac": {
+                      "type": "string",
+                      "description": "MAC address as a 12-digit hexadecimal value."
+                    },
+                    "usb": {
+                      "type": "string",
+                      "description": "USB VID & PID with format \"XXXX&YYYY\"."
+                    }
+                  },
+                  "required": ["id", "hw_ver", "fw_ver", "mac", "usb"],
+                  "example": {
+                    "id": "aabbccdd",
+                    "hw_ver": "01.02",
+                    "fw_ver": "01.02.03",
+                    "mac": "001122334455",
+                    "usb": "04D8&E487"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/api/time": {
+      "get": {
+        "summary": "Get device time",
+        "description": "Returns the current device time as an RFC3339/ISO-8601 UTC timestamp string (JSON string).",
+        "responses": {
+          "200": {
+            "description": "Current device time.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time",
+                  "example": "\"2025-01-01T00:00:00.000Z\""
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Set device time",
+        "description": "Sets the device time using an RFC3339/ISO-8601 UTC timestamp string (JSON string).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "date-time",
+                "example": "\"2025-01-01T00:00:00.000Z\""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Device time set successfully."
+          },
+          "400": {
+            "description": "Bad request (invalid/unsupported time format)."
+          }
+        }
+      }
+    },
+
+    "/api/can": {
+      "get": {
+        "summary": "List available CAN channels",
+        "description": "Returns a list of supported CAN channels.",
+        "responses": {
+          "200": {
+            "description": "List of CAN channels.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  },
+                  "example": [1, 2, 3, 4]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/api/can/{channel}": {
+      "get": {
+        "summary": "Get status of CAN channel",
+        "description": "Returns the current status of the CAN channel.",
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CAN channel status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/status"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "CAN channel not found."
+          }
+        }
+      }
+    },
+
+    "/api/can/{channel}/phy": {
+      "get": {
+        "summary": "Get CAN channel PHY configuration",
+        "description": "Returns CAN channel PHY configuration.",
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "PHY configuration returned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/phy"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "CAN channel not found."
+          }
+        }
+      },
+      "put": {
+        "summary": "Set CAN channel PHY configuration",
+        "description": "Sets CAN channel PHY configuration.",
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/phy"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "PHY configuration applied."
+          },
+          "400": {
+            "description": "Bad request (invalid JSON)."
+          },
+          "404": {
+            "description": "CAN channel not found."
+          }
+        }
+      }
+    },
+
+    "/api/can/{channel}/filter": {
+      "get": {
+        "summary": "List active receive filters",
+        "description": "Returns a list of IDs for all currently active receive filters.",
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of filter IDs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "CAN channel not found."
+          }
+        }
+      },
+      "post": {
+        "summary": "Create new receive filter",
+        "description": "Creates a new receive filter.",
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/filter"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Filter created successfully.",
+            "headers": {
+              "Location": {
+                "description": "URI of the newly created filter.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid JSON)."
+          },
+          "404": {
+            "description": "CAN channel not found."
+          },
+          "503": {
+            "description": "Service unavailable (e.g., no more space for filters)."
+          }
+        }
+      }
+    },
+
+    "/api/can/{channel}/filter/{filter_id}": {
+      "get": {
+        "summary": "Get filter",
+        "description": "Get receive filter details by ID.",
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "filter_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Filter details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/filter"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Filter not found."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete filter",
+        "description": "Removes receive filter by ID.",
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "filter_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Filter deleted successfully."
+          },
+          "404": {
+            "description": "Filter not found."
+          }
+        }
+      }
+    },
+
+    "/api/can/{channel}/transmit": {
+      "get": {
+        "summary": "List transmit sequences",
+        "description": "Returns a list of IDs for existing transmit sequences.",
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of transmit IDs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "CAN channel not found."
+          }
+        }
+      },
+      "post": {
+        "summary": "Create new transmit sequence.",
+        "description": "Creates new transmit sequence.",
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/transmit_sequence"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Transmit sequence created.",
+            "headers": {
+              "Location": {
+                "description": "URI of the newly created transmit sequence.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid JSON)."
+          },
+          "404": {
+            "description": "CAN channel not found."
+          },
+          "503": {
+            "description": "Service unavailable (e.g., no more space for transmit-sequences)."
+          }
+        }
+      }
+    },
+
+    "/api/can/{channel}/transmit/{transmit_id}": {
+      "get": {
+        "summary": "Get transmit sequence by ID",
+        "description": "Gets a transmit sequence by ID.",
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "transmit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transmit sequence details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/transmit_sequence"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Transmit sequence not found."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete transmit sequence",
+        "description": "Deletes a transmit sequence by ID.",
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "transmit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transmit sequence deleted."
+          },
+          "404": {
+            "description": "Transmit sequence not found."
+          }
+        }
+      }
+    },
+
+    "/api/can/{channel}/transmit/{transmit_id}/count": {
+      "get": {
+        "summary": "Get transmit sequence count",
+        "description": "Returns the current count value of the transmit sequence.",
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "transmit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current count value.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 4294967295,
+                  "description": "Valid count range (0xFFFFFFFF is error value).",
+                  "example": 10
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Transmit sequence not found."
+          }
+        }
+      },
+      "put": {
+        "summary": "Update transmit sequence count",
+        "description": "Updates the count value of an existing transmit sequence.",
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "transmit_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 4294967294,
+                "description": "Valid count range  (0xFFFFFFFF error value excluded).",
+                "example": 10
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transmit sequence count updated."
+          },
+          "400": {
+            "description": "Bad request (invalid count value/format)."
+          },
+          "404": {
+            "description": "Transmit sequence not found."
+          }
+        }
+      }
+    }
+  },
+
+  "components": {
+    "schemas": {
+      "status": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string",
+            "enum": ["error_active", "error_warning", "error_passive", "bus_off", "stopped"],
+            "description": "CAN controller state."
+          },
+          "frame_count": {
+            "type": "integer",
+            "description": "Frame counter."
+          },
+          "frame_rate": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Frame rate in frames per second."
+          },
+          "bus_load": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Bus load (0-100%)."
+          },
+          "rx_error_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 128,
+            "description": "Receive error counter."
+          },
+          "tx_error_count": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 256,
+            "description": "Transmit error counter."
+          },
+          "bus_error_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Bus error counter."
+          }
+        },
+        "required": ["state", "frame_count", "frame_rate", "bus_load", "rx_error_count", "tx_error_count", "bus_error_count"],
+        "example": {
+          "state": "stopped",
+          "frame_count": 0,
+          "frame_rate": 0,
+          "bus_load": 0,
+          "rx_error_count": 0,
+          "tx_error_count": 0,
+          "bus_error_count": 0
+        }
+      },
+
+      "bittiming": {
+        "type": "object",
+        "properties": {
+          "brp": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Baud Rate Prescaler."
+          },
+          "seg1": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Phase Segment 1."
+          },
+          "seg2": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Phase Segment 2."
+          },
+          "sjw": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Synchronization Jump Width."
+          }
+        },
+        "required": ["brp", "seg1", "seg2", "sjw"]
+      },
+
+      "phy": {
+        "type": "object",
+        "properties": {
+          "listen_only": {
+            "type": "boolean",
+            "description": "Enables listen-only mode."
+          },
+          "auto_reset": {
+            "type": "boolean",
+            "description": "Enables automatic bus-off recovery."
+          },
+          "error_frames": {
+            "type": "boolean",
+            "description": "Enables monitoring of error-frames (bus error, stuffing error, etc.)."
+          },
+          "timing": {
+            "description": "Nominal bit timing.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/bittiming"
+              }
+            ]
+          },
+          "timing_data": {
+            "description": "Data phase bit timing (for CAN-FD).",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/bittiming"
+              }
+            ]
+          }
+        },
+        "required": ["listen_only", "auto_reset", "error_frames" ,"timing", "timing_data"]
+      },
+
+      "filter": {
+        "type": "object",
+        "properties": {
+          "is_extended": {
+            "type": "boolean",
+            "description": "True for Extended ID (29-bit), False for Standard ID (11-bit)."
+          },
+          "is_range": {
+            "type": "boolean",
+            "description": "True if filter is a range filter, False if filter is a mask filter."
+          },
+          "f1": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295,
+            "description": "When is_range=false: filter ID. When is_range=true: range start."
+          },
+          "f2": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295,
+            "description": "When is_range=false: filter mask. When is_range=true: range end."
+          }
+        },
+        "required": ["is_extended", "is_range", "f1", "f2"]
+      },
+
+      "frame": {
+        "type": "object",
+        "properties": {
+          "is_extended": {
+            "type": "boolean",
+            "description": "Is frame ID extended (29-bit) or standard (11-bit)."
+          },
+          "is_fd": {
+            "type": "boolean",
+            "description": "Is frame format FD or classic."
+          },
+          "is_rtr_brs": {
+            "type": "boolean",
+            "description": "RTR for classic CAN, BRS (Bit Rate Switch) for CAN-FD."
+          },
+          "id": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295,
+            "description": "Frame identifier."
+          },
+          "data": {
+            "type": "string",
+            "description": "Hexadecimal encoded data payload. Empty string for no data bytes. Dummy bytes to set RTR frame length.",
+            "pattern": "^[0-9a-fA-F]*$",
+            "maxLength": 128
+          }
+        },
+        "required": ["is_extended", "is_fd", "is_rtr_brs", "id", "data"]
+      },
+
+      "transmit_sequence": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 4294967294,
+            "description": "Maximum number of times to transmit the sequence."
+          },
+          "period_ms": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Period of the full sequence in milliseconds."
+          },
+          "spacing_ms": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Spacing between individual frames in the sequence in milliseconds."
+          },
+          "frames": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/frame"
+            }
+          }
+        },
+        "required": ["limit", "period_ms", "spacing_ms", "frames"]
+      }
+    }
+  }
+}

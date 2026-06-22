@@ -1,0 +1,32 @@
+# Python dependencies for the CAN bus reverse-engineering skills.
+#
+# Install into a project-local virtual environment (recommended; required on
+# modern Linux, where global pip installs are blocked by PEP 668):
+#
+#   Windows:        install.bat
+#   macOS / Linux:  python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+#
+# Then open Claude Code in this folder; the skills invoke scripts via .venv.
+
+# --- core analysis (offline log decoding: survey / correlate / bitsearch /
+#     build_dbc / verify / calibrate / combine-dbc) ---
+cantools>=41.0
+numpy>=2.0
+pandas>=2.2
+scipy>=1.13
+matplotlib>=3.8
+
+# --- live CANsub capture (detect_bus / capture / flask_sync) ---
+# Not needed for the offline-log workflow, but installed so the full skill works.
+python-can>=4.6.0
+python-can-cansub>=2026.6.2
+flask>=3.0
+requests>=2.30
+
+# --- vision reference (vision_reference / vision_review): OCR a reference signal
+#     from a VIDEO of a display (dashboard / gauge app). Local + open source, no
+#     PyTorch. Use the successor `rapidocr` 2.x/3.x, NOT `rapidocr-onnxruntime`
+#     (which caps at Python <3.13). ---
+rapidocr>=2
+onnxruntime>=1.17
+opencv-python>=4.9

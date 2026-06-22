@@ -1,0 +1,2016 @@
+# CANsub.4 Docs, 02.01.00
+
+> User manual for the CANsub.4 CAN bus interface. Covers hardware, REST API, WebSocket API, and getting started.
+
+
+2026, CSS Electronics
+
+## Pages
+
+- [Introduction](index.html.md): Overview of the CANsub.4 CAN bus interface: key features, USB and Ethernet connectivity, web-based interface, and open API.
+- [Getting started](getting_started/index.html.md): Step-by-step first-time setup guide for the CANsub.4: USB connection, browser access, and initial CAN bus configuration.
+- [Legal information](legal/index.html.md): Usage warnings, terms, electromagnetic compatibility certifications (CE, FCC, IC), and contact information for the CANsub.4.
+- [API](api/index.html.md): Overview of the CANsub.4 open API: REST API for configuration and state monitoring, WebSocket API for live CAN bus data transfer.
+- [Device connection](connection/index.html.md): How to connect to the CANsub.4 via USB or Ethernet, device hostname, device detection (mDNS), and security (TLS).
+- [Docs for AI](ai/index.html.md): This documentation is available in plain-text format optimised for use with AI assistants (LLMs). Pr...
+- [Hardware](hardware/index.html.md): Hardware reference for the CANsub.4: connectors, display, enclosure, and device label.
+- [Specification](specification/index.html.md): Technical specifications for the CANsub.4: USB power, Ethernet, display, CAN bus channels with galvanic isolation, and mechanical dimensions.
+- [Firmware](firmware/index.html.md): How to update the CANsub.4 firmware via a browser: update steps, firmware downloads, and changelog.
+- [CANsub certificate installation](getting_started/certificate/index.html.md): How to install the CANsub root TLS certificate in Chrome or Firefox to trust the CANsub.4 without browser security warnings.
+- [REST API](api/api_rest.html.md): Reference for all CANsub.4 REST API endpoints: device info, device time, CAN channel configuration, hardware filters, and transmit sequences.
+- [Api Rest Playground](api/api_rest_playground.html.md): Browser-based REST API explorer embedded in the documentation. Connects as a client to a CANsub.4.
+- [WebSocket API](api/api_ws.html.md): Reference for the CANsub.4 WebSocket API: binary message framing, byte-stuffing, CAN frame serialization format, and decoding flow.
+- [Bit-timing](bit_timing.html.md): Bit-timing configuration reference for the CANsub.4: pre-calculated settings for CAN and CAN FD at various bus speeds on an 80 MHz clock.
+- [Connectors](hardware/connector.html.md): Physical connector reference for the CANsub.4: USB-C, RJ45, and CAN bus connectors with pinout diagrams for D-SUB connectors.
+- [Display](hardware/display.html.md): Reference for the CANsub.4 LCD display: layout modes, symbols, bus state indicators, and network status information.
+- [Enclosure](hardware/enclosure.html.md): The CANsub.4 aluminum enclosure with mounting flanges: engineering drawing and 3D model downloads.
+- [Label](hardware/label.html.md): The CANsub.4 device label: unique device ID, hardware version, production date, MAC address, and QR code.
+
+---
+
+# index.html.md
+
+# Introduction
+
+The **CANsub.4** is a compact and professional CAN bus interface with four galvanically isolated CAN buses.
+It combines high performance with features matching or exceeding those typically only found in larger, more expensive devices.
+
+The device connects via either USB<sup>[1](#usb)</sup> or Ethernet, both exposing an identical network interface<sup>[2](#net)</sup>.
+
+The device has an [LCD color display](hardware/display.md#display) providing useful information, such as CAN bus state, frame rate, and bus load.
+
+A built-in web-based user interface (*webCAN*) can be accessed through a browser without installing any software<sup>[3](#tls)</sup>. The *webCAN* tool comes with a rich set of features, such as raw-frame view, decoded-frame view, and live plotting.
+
+The CANsub.4 has an open [API](api/index.md#api) based on easily accessible technologies to encourage users to create 3rd-party integrations<sup>[4](#rd)</sup>.
+
+![image](cansub4.jpg)
+
+---
+* <a id='usb'>**[1]**</a> Network over USB using the USB CDC-NCM device class.
+* <a id='net'>**[2]**</a> Switching between USB and Ethernet requires only a URL change.
+* <a id='tls'>**[3]**</a> A TLS certificate can optionally be installed in the browser.
+* <a id='rd'>**[4]**</a> A range of 3rd party integrations and code examples are available on [csselectronics.com](https://csselectronics.com/).
+
+
+# index.html.md
+
+# Getting started
+
+This guide describes how to set up the CANsub.4 for the first time using a USB-C cable and the browser-based webCAN tool.
+
+#### NOTE
+Connecting via USB creates a virtual network adapter automatically - no driver installation is required. The webCAN tool and device [API](../api/index.md#api) work identically via both USB and Ethernet.
+
+---
+
+## Prerequisites
+
+- Review the [usage warning](../legal/index.md#usage-warning) before connecting the device to a live CAN bus.
+- Optionally, [install the CANsub root certificate](certificate/index.md#cansub-certificate-installation) to prevent browser security warnings
+
+---
+
+## Step 1 - power on
+
+Connect the CANsub.4 to a PC using a USB-C cable. The display activates and shows the device network information.
+
+![image](getting_started/cansub_display_net_usb.bmp)
+
+---
+
+## Step 2 - connect to the device
+
+Open a browser and enter the display URL `https://[HOSTNAME].local` to open webCAN.
+
+#### NOTE
+If the root CA certificate has not been installed, the browser will display a security warning. Accept the warning to proceed.
+
+---
+
+## Step 3 - connect a CAN bus
+
+Connect the CANsub.4 to a CAN bus (see [connector pinout](../hardware/connector.md#can-bus)).
+
+#### NOTE
+An optional DB25-4xDB9 splitter cable is available.
+
+---
+
+## Step 4 - use the webCAN tool
+
+webCAN includes a separate getting started guide via the ![icon_help](getting_started/help-circle.png) icon in the top right corner.
+
+---
+
+## Step 5 - where to go next
+
+- Try connecting the CANsub.4 to your local network (see [Ethernet-mode](../connection/index.md#ethernet-mode))
+- Explore the webCAN tool features in depth
+- Explore supported 3rd-party tools and programming language interfaces (see [CANsub tools](https://csselectronics.com/pages/can-bus-software-api-tools/))
+- Explore the open API for advanced custom integrations (see [API](../api/index.md#api))
+
+
+# index.html.md
+
+# Legal information
+
+## Usage warning
+
+#### WARNING
+Review before connecting the device to a live CAN bus.
+
+The use of the CANsub.4 must be done with caution and an understanding of the risks involved. The operation of the device may be dangerous as you may affect the operation and behavior of a CAN bus system.
+
+Improper installation or use can lead to serious malfunction, loss of data, equipment damage, or physical injury. When connected to a CAN bus controlled system, the device can potentially cause unintended operational changes, including activating or deactivating modules and functions.
+
+The device should only be used by persons who are qualified, understand the risks and understand how the device interacts with the system in which it is integrated.
+
+---
+
+## Terms & conditions
+
+Please refer to our general [terms & conditions](https://www.csselectronics.com/policies/terms-of-service).
+
+---
+
+## Electromagnetic compatibility
+
+The CANsub has been tested in accordance with CE, FCC and IC standards.
+
+Certificates are available in the online documentation.
+
+---
+
+## Contact details
+
+For any questions regarding our products, please contact us:
+
+CSS Electronics
+<br/>
+EU VAT ID: DK36711949
+<br/>
+Soeren Frichs Vej 38K (Office 35), 8230 Aabyhoej, Denmark
+<br/>
+contact[AT]csselectronics.com
+<br/>
++45 91252563
+<br/>
+[www.csselectronics.com](https://www.csselectronics.com)
+<br/>
+
+
+# index.html.md
+
+# API
+
+The CANsub.4 has an open API based on easily accessible technologies to encourage users to create 3rd-party integrations. The API enables full control of the device.
+
+The following diagram illustrates the CANsub stack, including the *API* layer. The built-in *webCAN* tool exclusively uses the open API.
+
+The API is split into a [REST API](api_rest.md#rest-api) for configuration and state monitoring, and a [WebSocket API](api_ws.md#websocket-api)<sup>[1](#fn-websocket)</sup> for live data transfer (CAN bus data). The API is located under `api/`.
+
+#### NOTE
+mDNS can be used for device detection, see [Detection](../connection/index.md#detection).
+
+---
+
+## Usage
+
+A typical integration follows this flow:
+
+1. **Initialize**  *(once)*: Verify the API version and sync the device clock if needed (REST)
+2. **Configure bus**  *(per bus)*: Configure CAN bus (REST)
+3. **Open bus**: Connect WebSocket to open CAN bus (WebSocket)
+4. **Communicate**: Communicate with the CAN bus (WebSocket) and monitor states (REST)
+5. **Close bus**: Disconnect WebSocket to stop the CAN bus (WebSocket)
+
+For more details, see [REST API](api_rest.md#rest-api) and [WebSocket API](api_ws.md#websocket-api).
+
+---
+* <a id='fn-websocket'>**[1]**</a> WebSocket is chosen over raw TCP socket to make the API web-friendly.
+
+
+# index.html.md
+
+# Device connection
+
+The CANsub.4 is always powered via the USB-cable. Data is transferred via either the USB cable or the Ethernet cable. In both cases, data is transferred through a network interface. The webCAN tool and device [API](../api/index.md#api) work identically via both connections.
+
+This section documents the connection modes (USB/Ethernet), device hostname, device detection (using mDNS), and security (using TLS):
+
+> * [Mode](#mode)
+>   * [USB-mode](#usb-mode)
+>   * [Ethernet-mode](#ethernet-mode)
+> * [Detection](#detection)
+> * [TLS](#tls)
+
+---
+
+## Mode
+
+The device selects which data connection to use based on the following logic<sup>[1](#fn-change-mode)</sup>:
+
+The detection state is shown on the device display, see [Connection layout](../hardware/display.md#connection-layout).
+
+#### NOTE
+The device uses distinct hostnames for the USB (`[DEVICE-ID]-usb.local`) and Ethernet (`[DEVICE-ID]-eth.local`) connections to prevent hostname resolution conflicts when switching between the two.
+
+---
+
+### USB-mode
+
+In *USB-mode* the device is powered via USB and transfers data via USB.
+
+When transferring data over USB, the device uses the USB CDC-NCM class<sup>[3](#fn-cdc-ncm)</sup> to expose a network interface. When using this mode, the device starts a DHCP server, ready to assign an IP address to the connected USB host.
+
+| Hostname          | DHCP   | Network       | Device IPv4   | Host IPv4    |
+|-------------------|--------|---------------|---------------|--------------|
+| `[DEVICE-ID]-usb` | Server | `10.x.y.0/24` | `10.x.y.1`    | `10.x.y.100` |
+
+The device hostname and IP are shown on the device display, see [Network layout](../hardware/display.md#network-layout).
+
+The webpage hosted by the device can be accessed via:
+
+- `https://[DEVICE-ID]-usb.local`<sup>[2](#fn-local)</sup> (e.g. `https://aabbccdd-usb.local`)
+- `https://[DEVICE-IP]` (e.g. `https://10.119.41.1`)
+
+The CANsub.4 is identified on the USB bus by the following vendor and product IDs:
+
+| Parameter        | Value    |
+|------------------|----------|
+| Vendor ID (VID)  | `0x04D8` |
+| Product ID (PID) | `0xE487` |
+
+The device ID is stored in the USB serial number descriptor.
+
+```console
+$ lsusb -v -d 04d8:e487 | grep iSerial
+  iSerial                 3 aabbccdd
+```
+
+---
+
+### Ethernet-mode
+
+In *Ethernet-mode* the device is powered via USB (charger) and transfers data via Ethernet.
+
+#### NOTE
+An optional Power-over-Ethernet (PoE) adapter is available.
+
+| Hostname          | DHCP   | Device IPv4   |
+|-------------------|--------|---------------|
+| `[DEVICE-ID]-eth` | Client | Assigned      |
+
+The device hostname and IP are shown on the device display, see [Network layout](../hardware/display.md#network-layout).
+
+#### NOTE
+The device obtains its IP address from a DHCP server (required). The device MAC address can be found via the [label](../hardware/label.md#label) or [display](../hardware/display.md#information-layout).
+
+The webpage hosted by the device can be accessed via:
+
+- `https://[DEVICE-ID]-eth.local`<sup>[2](#fn-local)</sup> (e.g. `https://aabbccdd-eth.local`)
+- `https://[DEVICE-IP]` (e.g. `https://192.168.1.100`)
+
+---
+
+## Detection
+
+#### NOTE
+The device ID is printed on the device enclosure and can be used to construct the device hostname as explained in [Mode](#mode) and [Getting started](../getting_started/index.md#getting-started). This section explains how to detect a CANsub device when the device ID is unknown.
+
+The CANsub.4 advertises itself on the local network (USB or Ethernet) using mDNS<sup>[5](#fn-mdns)</sup> and DNS-SD<sup>[6](#fn-dnssd)</sup>. This allows the device to be discovered without knowing its IP address in advance.
+
+The device registers a service of type `_cansub._tcp` with the following properties:
+
+| Property        | Value                                                                       |
+|-----------------|-----------------------------------------------------------------------------|
+| Service type    | `_cansub._tcp`                                                              |
+| Hostname        | `[HOSTNAME].local`<br/>(`[DEVICE-ID]-usb.local` or `[DEVICE-ID]-eth.local`) |
+| Port            | `443`                                                                       |
+| TXT: `api`      | REST API version (e.g. `02.00`)                                             |
+| TXT: `channels` | Number of CAN-bus channels (`1`, `2`, or `4`)                               |
+
+### Windows
+
+On Windows, the `dns-sd`<sup>[7](#fn-dnssd-win)</sup> tool can be used for mDNS discovery.
+
+```doscon
+C:\>dns-sd -Z _cansub._tcp local
+
+_cansub._tcp                                    PTR     aabbccdd-usb._cansub._tcp
+aabbccdd-usb._cansub._tcp                       TXT     "api=02.00" "channels=4"
+```
+
+### Linux
+
+On Linux, the `avahi-browse`<sup>[8](#fn-avahi)</sup> tool can be used for mDNS discovery.
+
+```console
+$ avahi-browse _cansub._tcp --resolve
+
+= enx00005e005301 IPv4 aabbccdd-usb     _cansub._tcp         local
+hostname = [aabbccdd-usb.local]
+address = [10.201.129.1]
+port = [443]
+txt = ["channels=4" "api=02.00"]
+```
+
+---
+
+## TLS
+
+Data transferred over the device network connection (USB or Ethernet) is secured by TLS. The unique device certificate is signed by the root certificate below.
+
+[`CANsub root certificate`](/../assets_collected/cansub4/cansub_root_cert.crt)
+<br/>
+`SHA-256 fingerprint = D064C85905195400216A11BB50D754865ED2B5F997D36A9EA2EA97883B15D0F1`
+<br/>
+
+#### NOTE
+The host machine (e.g. PC) can be made to trust the device (all CANsub devices) by installing the CANsub root certificate. For more information on how to install the root certificate, see [CANsub certificate installation](../getting_started/certificate/index.md#cansub-certificate-installation).
+
+The table below provides an overview of the root and device certificate parameters.
+
+| Parameter           | Root certificate   | Device certificate                                       |
+|---------------------|--------------------|----------------------------------------------------------|
+| Key algorithm       | ECDSA P-256        | ECDSA P-256                                              |
+| Signature algorithm | ECDSA-SHA256       | ECDSA-SHA256                                             |
+| Issued to           | `CANsub root`      | `CANsub [DEVICE-ID]`                                     |
+| Hostnames (SAN)     |                    | `[DEVICE-ID]-usb.local`<br/><br/>`[DEVICE-ID]-eth.local` |
+
+#### NOTE
+The device certificate Subject Alternative Name (SAN) field allows for hostname verification.
+
+The device uses the TLS cipher suite: `ECDHE-ECDSA-AES128-GCM-SHA256`<sup>[4](#fn-cipher-suite)</sup>.
+
+---
+* <a id='fn-change-mode'>**[1]**</a> Changing data connection mode requires a power-cycle.
+* <a id='fn-local'>**[2]**</a> `.local` is used for hostnames on a local network.
+* <a id='fn-cdc-ncm'>**[3]**</a> CDC-NCM enables Ethernet networking over a USB connection.
+* <a id='fn-cipher-suite'>**[4]**</a> The client must support the cipher suite for the TLS handshake to succeed.
+* <a id='fn-mdns'>**[5]**</a> mDNS (Multicast DNS, RFC 6762) resolves hostnames on a local network without a DNS server.
+* <a id='fn-dnssd'>**[6]**</a> DNS-SD (DNS Service Discovery, RFC 6763) advertises services on a local network.
+* <a id='fn-dnssd-win'>**[7]**</a> `dns-sd.exe` is included with [Bonjour for Windows](https://support.apple.com/kb/DL999) (Apple).
+* <a id='fn-avahi'>**[8]**</a> `avahi-browse` is part of the `avahi-utils` package.
+
+
+# index.html.md
+
+# Docs for AI
+
+This documentation is available in plain-text format optimised for use with AI assistants (LLMs). Provide your LLM access to below file to ask questions about the CANsub.4.
+
+<a class="reference download internal" download href="../
+cansub4_llm.txt
+">
+<code class="xref download docutils literal notranslate"><span class="pre">CANsub.4 AI Docs</span></code>
+</a>
+
+
+# index.html.md
+
+# Hardware
+
+This section contains information on the CANsub.4 hardware.
+
+
+# index.html.md
+
+# Specification
+
+## USB
+
+* USB-C connector
+* Powered through USB connector (5 V)
+* USB CDC-NCM device class
+
+## Ethernet
+
+* RJ45 connector
+* 10/100 base-t/tx IEEE 802.3 ethernet transceiver
+* Link status LED
+
+## Display
+
+* 0.96” backlit LCD color display
+
+## Network
+
+* Network over USB (CDC-NCM) or Ethernet
+* Discovery via mDNS
+* Data secured using TLS
+
+## CAN bus
+
+* Physical
+  > * Four galvanically isolated<sup>[1](#fn-basic-isolation)</sup> physical CAN bus interfaces
+  > * DB25 (D-sub25) connector
+* Transceiver
+  > * Compliant with ISO 11898-2:2016 (classical CAN and CAN-FD)
+  > * Short-circuit, bus-fault, and undervoltage protection
+  > * Ideal passive behavior when unpowered (high impedance / no load)
+  > * TXD dominant timeout (prevents network blocking in the event of a failure)
+* Controller
+  > * Based on MCAN IP from Bosch
+  > * Customizable bit-rate / bit-timing / sample-point
+  > * Customizable hardware filters (range or mask)
+  > * Support for bus-error monitoring
+  > * Support for listen-only mode (transmission disabled)
+
+## Mechanical
+
+* Robust aluminum enclosure
+* Flanges for secure mounting
+* Dimensions: 67 x 87 x 20 mm (L x W x H)
+* Operating temperature: -25 °C to +70 °C
+
+---
+* <a id='fn-basic-isolation'>**[1]**</a> The CANsub.4 implements a *basic* galvanic isolation, making it easy to connect CAN bus networks not subjected to high voltage differences.
+
+
+# index.html.md
+
+# Firmware
+
+The firmware of the CANsub.4 can be updated directly from a browser.
+
+---
+
+## Firmware update steps
+
+1. Download and unzip the new firmware (see firmware files below).
+2. Connect the CANsub.4 to a PC using a USB-C cable<sup>[1](#fn-update-via-ethernet)</sup>.
+3. Open the firmware update page in a browser<sup>[2](#fn-url)</sup>:
+   ```text
+   https://[DEVICE-ID]-usb.local/firmware
+   ```
+4. Follow the steps on the page to update the firmware.
+
+---
+
+## Firmware files
+
+* [Firmware-02.01.00.zip](../../assets_collected/cansub4/release_binaries/firmware-02.01.00.zip)
+* [Firmware-02.00.00.zip](../../assets_collected/cansub4/release_binaries/firmware-02.00.00.zip)
+
+---
+
+## Changelog
+
+```markdown
+# Change Log
+All notable changes to CANsub firmware will be documented in this file.
+
+Types of changes:
+- "Added": New features
+- "Changed": Changes to existing functionality
+- "Fixed": Bug fixes
+- "Known issues": Known issues
+- "Warning": Warnings
+
+
+## [02.01.00] - 2026-05-21
+
+### Added
+- Device-ID to USB descriptor (serial)
+- Device network discoverability via mDNS
+
+### Known issues
+- Transmitted messages are not included in the bus-load calculation
+- HTTP CORS not working for request types POST/DELETE
+
+## [02.00.00] - 2026-05-18
+
+### Added
+- Initial release
+
+### Known issues
+- Transmitted messages are not included in the bus-load calculation
+
+
+```
+
+---
+
+## Versioning & naming
+
+The firmware version follows semantic versioning (`MAJOR.MINOR.PATCH`).
+
+* `MAJOR`: Breaking changes
+* `MINOR`: Backwards-compatible changes
+* `PATCH`: Minor changes
+
+---
+* <a id='fn-update-via-ethernet'>**[1]**</a> Firmware update is also possible over Ethernet, navigate to `https://[DEVICE-ID]-eth.local/firmware`.
+* <a id='fn-url'>**[2]**</a> The device URL can be found on the display.
+
+
+# index.html.md
+
+# CANsub certificate installation
+
+Installing the CANsub root certificate allows the browser to trust the CANsub.4 without displaying a security warning.
+
+The guides below cover installation of the certificate in the Chrome and Firefox browsers. OS-level installation is outside the scope of this manual. Steps may differ slightly depending on the browser versions.
+
+[`Download CANsub root certificate`](/../assets_collected/cansub4/cansub_root_cert.crt)
+<br/>
+`SHA-256 fingerprint = D064C85905195400216A11BB50D754865ED2B5F997D36A9EA2EA97883B15D0F1`
+<br/>
+> ##### Certificate installation guides
+> 
+> * [Chrome browser](#chrome-browser)
+> * [Firefox browser](#firefox-browser)
+
+---
+
+## Chrome browser
+
+1. Enter the following URL in the Chrome address bar to open the Certificate Manager.
+   ```text
+   chrome://certificate-manager/
+   ```
+
+   ![image](getting_started/certificate/chrome_1.png)
+2. Click *Installed by you* under *Customised*.
+   ![image](getting_started/certificate/chrome_2.png)
+3. Click *Import* next to *Trusted certificates*.
+   ![image](getting_started/certificate/chrome_3.png)
+4. Select the downloaded CANsub root CA certificate file and click *Select*.
+   ![image](getting_started/certificate/chrome_4.png)
+5. The certificate is now listed under *Trusted certificates*. The SHA-256 fingerprint is shown - optionally verify it against the value provided above.
+   ![image](getting_started/certificate/chrome_5.png)
+
+---
+
+## Firefox browser
+
+1. Enter the following URL in the Firefox address bar to open Privacy & Security settings.
+   ```text
+   about:preferences#privacy
+   ```
+
+   ![image](getting_started/certificate/firefox_1.png)
+2. Find the *Security* section. Click *Manage Certificates*.
+   ![image](getting_started/certificate/firefox_2.png)
+3. Select the *Authorities* tab and click *Import*.
+   ![image](getting_started/certificate/firefox_3.png)
+4. Select the downloaded CANsub root CA certificate file and click *Select*.
+   ![image](getting_started/certificate/firefox_4.png)
+5. Check *Trust this CA to identify websites*. Optionally, click *View* to verify the certificate SHA-256 fingerprint against the value provided above.
+   ![image](getting_started/certificate/firefox_5.png)
+6. Click *OK*. Scroll down in the *Authorities* list to confirm the *CANsub root* certificate is listed, then click *OK* to close the Certificate Manager.
+   ![image](getting_started/certificate/firefox_6.png)
+
+
+# api_rest.html.md
+
+# REST API
+
+The REST API is used for device configuration and state monitoring. The REST API is located under `https://[DEVICE-HOSTNAME].local/api` (e.g. `https://aabbccdd-usb.local/api`).
+
+#### NOTE
+CAN bus frames are transferred via the [WebSocket API](api_ws.md#websocket-api). A CAN bus is opened by connecting the WebSocket and closed by disconnecting the WebSocket.
+
+---
+
+### TLS
+
+The REST API uses TLS. The CANsub certificate can be downloaded below.
+
+[`Download CANsub root certificate`](/../assets_collected/cansub4/cansub_root_cert.crt)
+<br/>
+`SHA-256 fingerprint = D064C85905195400216A11BB50D754865ED2B5F997D36A9EA2EA97883B15D0F1`
+<br/>
+
+---
+
+The API endpoints are described in detail below.
+
+> ##### API endpoint overview
+> 
+> * [API version](#api-version)
+> * [Device info](#device-info)
+> * [Device time](#device-time)
+> * [CAN channel list](#can-channel-list)
+> * [CAN {channel} status](#can-channel-status)
+> * [CAN {channel} physical](#can-channel-physical)
+> * [CAN {channel} filter](#can-channel-filter)
+> * [CAN {channel} filter {filter_id}](#can-channel-filter-filter-id)
+> * [CAN {channel} transmit](#can-channel-transmit)
+> * [CAN {channel} transmit {transmit_id}](#can-channel-transmit-transmit-id)
+> * [CAN {channel} transmit {transmit_id} count](#can-channel-transmit-transmit-id-count)
+
+---
+
+## API version
+
+Provides the version of the API. The version follows the format `MAJOR.MINOR`. Clients should start by reading the API version to ensure compatibility.
+
+### GET /api/version
+
+**Get API version**
+
+Returns the current version of the REST API.
+
+**Example request:**
+
+```http
+GET /api/version HTTP/1.1
+Host: example.com
+```
+
+* **Status Codes:**
+  * [200 OK](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200) – 
+
+    API Version.
+
+    **Example response:**
+    ```http
+    HTTP/1.1 200 OK
+    Content-Type: text/plain
+
+    01.23
+    ```
+
+The version value has the following format.
+
+| type   | *string*   |
+|--------|------------|
+
+---
+
+## Device info
+
+Provides general device information.
+
+### GET /api/info
+
+**Get device information**
+
+Returns general device information.
+
+**Example request:**
+
+```http
+GET /api/info HTTP/1.1
+Host: example.com
+```
+
+* **Status Codes:**
+  * [200 OK](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200) – 
+
+    Device information.
+
+    **Example response:**
+    ```http
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+        "id": "aabbccdd",
+        "hw_ver": "01.02",
+        "fw_ver": "01.02.03",
+        "mac": "001122334455",
+        "usb": "04D8&E487"
+    }
+    ```
+
+The response has the following format.
+
+| type         | *object*                                     |
+|--------------|----------------------------------------------|
+| properties   |                                              |
+| - **id**     | Device ID as a 8-digit hexadecimal value.    |
+| type         | *string*                                     |
+| - **hw_ver** | Hardware version with format “xx.yy”.        |
+| type         | *string*                                     |
+| - **fw_ver** | Firmware version with format “xx.yy.zz”.     |
+| type         | *string*                                     |
+| - **mac**    | MAC address as a 12-digit hexadecimal value. |
+| type         | *string*                                     |
+| - **usb**    | USB VID & PID with format “XXXX&YYYY”.       |
+| type         | *string*                                     |
+
+---
+
+## Device time
+
+Provides access to the device time (wall-time). The device time needs to be set for the device to be able to correctly timestamp CAN bus frames.
+
+#### NOTE
+The time is reset on power-cycles and is shared across all CAN channels.
+
+### GET /api/time
+
+**Get device time**
+
+Returns the current device time as an RFC3339/ISO-8601 UTC timestamp string (JSON string).
+
+**Example request:**
+
+```http
+GET /api/time HTTP/1.1
+Host: example.com
+```
+
+* **Status Codes:**
+  * [200 OK](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200) – 
+
+    Current device time.
+
+    **Example response:**
+    ```http
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    "2025-01-01T00:00:00.000Z"
+    ```
+
+### PUT /api/time
+
+**Set device time**
+
+Sets the device time using an RFC3339/ISO-8601 UTC timestamp string (JSON string).
+
+**Example request:**
+
+```http
+PUT /api/time HTTP/1.1
+Host: example.com
+Content-Type: application/json
+
+"2025-01-01T00:00:00.000Z"
+```
+
+* **Status Codes:**
+  * [200 OK](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200) – Device time set successfully.
+  * [400 Bad Request](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/400) – Bad request (invalid/unsupported time format).
+
+The time value (GET response and PUT request body) has the following format.
+
+| type   | *string*   |
+|--------|------------|
+| format | date-time  |
+
+---
+
+## CAN channel list
+
+Returns a list of supported physical CAN channels. The channel *indexes* are used to access channel specific endpoint (`{channel}`).
+
+### GET /api/can
+
+**List available CAN channels**
+
+Returns a list of supported CAN channels.
+
+**Example request:**
+
+```http
+GET /api/can HTTP/1.1
+Host: example.com
+```
+
+* **Status Codes:**
+  * [200 OK](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200) – 
+
+    List of CAN channels.
+
+    **Example response:**
+    ```http
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    [
+        1,
+        2,
+        3,
+        4
+    ]
+    ```
+
+---
+
+## CAN {channel} status
+
+Returns the status of a specific CAN channel.
+
+### GET /api/can/{channel}
+
+**Get status of CAN channel**
+
+Returns the current status of the CAN channel.
+
+* **Parameters:**
+  * **channel** (*integer*)
+
+**Example request:**
+
+```http
+GET /api/can/{channel} HTTP/1.1
+Host: example.com
+```
+
+* **Status Codes:**
+  * [200 OK](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200) – 
+
+    CAN channel status.
+
+    **Example response:**
+    ```http
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+        "state": "stopped",
+        "frame_count": 0,
+        "frame_rate": 0,
+        "bus_load": 0,
+        "rx_error_count": 0,
+        "tx_error_count": 0,
+        "bus_error_count": 0
+    }
+    ```
+  * [404 Not Found](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404) – CAN channel not found.
+
+The status has the following format.
+
+| type                  | *object*                                                     |
+|-----------------------|--------------------------------------------------------------|
+| properties            |                                                              |
+| - **state**           | CAN controller state.                                        |
+| type                  | *string*                                                     |
+| enum                  | error_active, error_warning, error_passive, bus_off, stopped |
+| - **frame_count**     | Frame counter.                                               |
+| type                  | *integer*                                                    |
+| - **frame_rate**      | Frame rate in frames per second.                             |
+| type                  | *integer*                                                    |
+| minimum               | 0                                                            |
+| - **bus_load**        | Bus load (0-100%).                                           |
+| type                  | *integer*                                                    |
+| maximum               | 100                                                          |
+| minimum               | 0                                                            |
+| - **rx_error_count**  | Receive error counter.                                       |
+| type                  | *integer*                                                    |
+| maximum               | 128                                                          |
+| minimum               | 0                                                            |
+| - **tx_error_count**  | Transmit error counter.                                      |
+| type                  | *integer*                                                    |
+| maximum               | 256                                                          |
+| minimum               | 0                                                            |
+| - **bus_error_count** | Bus error counter.                                           |
+| type                  | *integer*                                                    |
+| minimum               | 0                                                            |
+
+---
+
+## CAN {channel} physical
+
+Configuration of the *physical* parameters of a specific CAN channel.
+
+A list of valid bit-timing configurations can be found here: [bit-timing list](../bit_timing.md#bit-timing).
+
+### GET /api/can/{channel}/phy
+
+**Get CAN channel PHY configuration**
+
+Returns CAN channel PHY configuration.
+
+* **Parameters:**
+  * **channel** (*integer*)
+
+**Example request:**
+
+```http
+GET /api/can/{channel}/phy HTTP/1.1
+Host: example.com
+```
+
+* **Status Codes:**
+  * [200 OK](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200) – 
+
+    PHY configuration returned.
+
+    **Example response:**
+    ```http
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+        "listen_only": true,
+        "auto_reset": true,
+        "error_frames": true,
+        "timing": {
+            "brp": 1,
+            "seg1": 1,
+            "seg2": 1,
+            "sjw": 1
+        },
+        "timing_data": {
+            "brp": 1,
+            "seg1": 1,
+            "seg2": 1,
+            "sjw": 1
+        }
+    }
+    ```
+  * [404 Not Found](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404) – CAN channel not found.
+
+### PUT /api/can/{channel}/phy
+
+**Set CAN channel PHY configuration**
+
+Sets CAN channel PHY configuration.
+
+* **Parameters:**
+  * **channel** (*integer*)
+
+**Example request:**
+
+```http
+PUT /api/can/{channel}/phy HTTP/1.1
+Host: example.com
+Content-Type: application/json
+
+{
+    "listen_only": true,
+    "auto_reset": true,
+    "error_frames": true,
+    "timing": {
+        "brp": 1,
+        "seg1": 1,
+        "seg2": 1,
+        "sjw": 1
+    },
+    "timing_data": {
+        "brp": 1,
+        "seg1": 1,
+        "seg2": 1,
+        "sjw": 1
+    }
+}
+```
+
+* **Status Codes:**
+  * [200 OK](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200) – PHY configuration applied.
+  * [400 Bad Request](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/400) – Bad request (invalid JSON).
+  * [404 Not Found](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404) – CAN channel not found.
+
+The configuration has the following format.
+
+| type               | *object*                                                              |
+|--------------------|-----------------------------------------------------------------------|
+| properties         |                                                                       |
+| - **listen_only**  | Enables listen-only mode.                                             |
+| type               | *boolean*                                                             |
+| - **auto_reset**   | Enables automatic bus-off recovery.                                   |
+| type               | *boolean*                                                             |
+| - **error_frames** | Enables monitoring of error-frames (bus error, stuffing error, etc.). |
+| type               | *boolean*                                                             |
+| - **timing**       | Nominal bit timing.                                                   |
+| allOf              | type                                                                  |
+| properties         |                                                                       |
+| - **brp**          | Baud Rate Prescaler.                                                  |
+| type               | *integer*                                                             |
+| minimum            | 1                                                                     |
+| - **seg1**         | Phase Segment 1.                                                      |
+| type               | *integer*                                                             |
+| minimum            | 1                                                                     |
+| - **seg2**         | Phase Segment 2.                                                      |
+| type               | *integer*                                                             |
+| minimum            | 1                                                                     |
+| - **sjw**          | Synchronization Jump Width.                                           |
+| type               | *integer*                                                             |
+| minimum            | 1                                                                     |
+| - **timing_data**  | Data phase bit timing (for CAN-FD).                                   |
+| allOf              | type                                                                  |
+| properties         |                                                                       |
+| - **brp**          | Baud Rate Prescaler.                                                  |
+| type               | *integer*                                                             |
+| minimum            | 1                                                                     |
+| - **seg1**         | Phase Segment 1.                                                      |
+| type               | *integer*                                                             |
+| minimum            | 1                                                                     |
+| - **seg2**         | Phase Segment 2.                                                      |
+| type               | *integer*                                                             |
+| minimum            | 1                                                                     |
+| - **sjw**          | Synchronization Jump Width.                                           |
+| type               | *integer*                                                             |
+| minimum            | 1                                                                     |
+
+---
+
+## CAN {channel} filter
+
+List (GET) and create (POST) hardware acceptance filters of a specific CAN channel. As default, the device has two filters accepting all standard and extended frame IDs. Removing all filters results in no frames getting accepted. When a new filter is created, the ID is returned via the *Location* header field.
+
+#### NOTE
+Hardware filters can be used to reduce network load.
+
+### GET /api/can/{channel}/filter
+
+**List active receive filters**
+
+Returns a list of IDs for all currently active receive filters.
+
+* **Parameters:**
+  * **channel** (*integer*)
+
+**Example request:**
+
+```http
+GET /api/can/{channel}/filter HTTP/1.1
+Host: example.com
+```
+
+* **Status Codes:**
+  * [200 OK](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200) – 
+
+    List of filter IDs.
+
+    **Example response:**
+    ```http
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    [
+        1
+    ]
+    ```
+  * [404 Not Found](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404) – CAN channel not found.
+
+### POST /api/can/{channel}/filter
+
+**Create new receive filter**
+
+Creates a new receive filter.
+
+* **Parameters:**
+  * **channel** (*integer*)
+
+**Example request:**
+
+```http
+POST /api/can/{channel}/filter HTTP/1.1
+Host: example.com
+Content-Type: application/json
+
+{
+    "is_extended": true,
+    "is_range": true,
+    "f1": 1,
+    "f2": 1
+}
+```
+
+* **Status Codes:**
+  * [201 Created](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/201) – Filter created successfully.
+  * [400 Bad Request](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/400) – Bad request (invalid JSON).
+  * [404 Not Found](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404) – CAN channel not found.
+  * [503 Service Unavailable](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/503) – Service unavailable (e.g., no more space for filters).
+* **Response Headers:**
+  * **Location** – URI of the newly created filter.
+
+A filter has the following format.
+
+| type              | *object*                                                            |
+|-------------------|---------------------------------------------------------------------|
+| properties        |                                                                     |
+| - **is_extended** | True for Extended ID (29-bit), False for Standard ID (11-bit).      |
+| type              | *boolean*                                                           |
+| - **is_range**    | True if filter is a range filter, False if filter is a mask filter. |
+| type              | *boolean*                                                           |
+| - **f1**          | When is_range=false: filter ID. When is_range=true: range start.    |
+| type              | *integer*                                                           |
+| maximum           | 4294967295                                                          |
+| minimum           | 0                                                                   |
+| - **f2**          | When is_range=false: filter mask. When is_range=true: range end.    |
+| type              | *integer*                                                           |
+| maximum           | 4294967295                                                          |
+| minimum           | 0                                                                   |
+
+---
+
+## CAN {channel} filter {filter_id}
+
+Read (GET) or remove (DELETE) a filter by ID of a specific CAN channel.
+
+### GET /api/can/{channel}/filter/{filter_id}
+
+**Get filter**
+
+Get receive filter details by ID.
+
+* **Parameters:**
+  * **channel** (*integer*)
+  * **filter_id** (*integer*)
+
+**Example request:**
+
+```http
+GET /api/can/{channel}/filter/{filter_id} HTTP/1.1
+Host: example.com
+```
+
+* **Status Codes:**
+  * [200 OK](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200) – 
+
+    Filter details.
+
+    **Example response:**
+    ```http
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+        "is_extended": true,
+        "is_range": true,
+        "f1": 1,
+        "f2": 1
+    }
+    ```
+  * [404 Not Found](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404) – Filter not found.
+
+### DELETE /api/can/{channel}/filter/{filter_id}
+
+**Delete filter**
+
+Removes receive filter by ID.
+
+* **Parameters:**
+  * **channel** (*integer*)
+  * **filter_id** (*integer*)
+* **Status Codes:**
+  * [200 OK](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200) – Filter deleted successfully.
+  * [404 Not Found](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404) – Filter not found.
+
+A filter has the following format.
+
+| type              | *object*                                                            |
+|-------------------|---------------------------------------------------------------------|
+| properties        |                                                                     |
+| - **is_extended** | True for Extended ID (29-bit), False for Standard ID (11-bit).      |
+| type              | *boolean*                                                           |
+| - **is_range**    | True if filter is a range filter, False if filter is a mask filter. |
+| type              | *boolean*                                                           |
+| - **f1**          | When is_range=false: filter ID. When is_range=true: range start.    |
+| type              | *integer*                                                           |
+| maximum           | 4294967295                                                          |
+| minimum           | 0                                                                   |
+| - **f2**          | When is_range=false: filter mask. When is_range=true: range end.    |
+| type              | *integer*                                                           |
+| maximum           | 4294967295                                                          |
+| minimum           | 0                                                                   |
+
+---
+
+## CAN {channel} transmit
+
+Transmit-sequences are transmission *jobs* submitted to the device, allowing for hardware-controlled high precision transmissions (even on high-latency networks). A transmit-sequence contains a list of CAN frames to transmit and a set of parameters to control the transmission (see the parameter descriptions below).
+
+List (GET) and create (POST) transmit-sequences of a specific CAN channel. A new transmission sequence is created with `count` set to `limit` - update the `count` value (e.g. to zero) to start the transmission-sequence. When a transmission sequence is created, the ID is returned via the *Location* header field.
+
+### GET /api/can/{channel}/transmit
+
+**List transmit sequences**
+
+Returns a list of IDs for existing transmit sequences.
+
+* **Parameters:**
+  * **channel** (*integer*)
+
+**Example request:**
+
+```http
+GET /api/can/{channel}/transmit HTTP/1.1
+Host: example.com
+```
+
+* **Status Codes:**
+  * [200 OK](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200) – 
+
+    List of transmit IDs.
+
+    **Example response:**
+    ```http
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    [
+        1
+    ]
+    ```
+  * [404 Not Found](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404) – CAN channel not found.
+
+### POST /api/can/{channel}/transmit
+
+**Create new transmit sequence.**
+
+Creates new transmit sequence.
+
+* **Parameters:**
+  * **channel** (*integer*)
+
+**Example request:**
+
+```http
+POST /api/can/{channel}/transmit HTTP/1.1
+Host: example.com
+Content-Type: application/json
+
+{
+    "limit": 1,
+    "period_ms": 1,
+    "spacing_ms": 1,
+    "frames": [
+        {
+            "is_extended": true,
+            "is_fd": true,
+            "is_rtr_brs": true,
+            "id": 1,
+            "data": "string"
+        }
+    ]
+}
+```
+
+* **Status Codes:**
+  * [201 Created](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/201) – Transmit sequence created.
+  * [400 Bad Request](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/400) – Bad request (invalid JSON).
+  * [404 Not Found](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404) – CAN channel not found.
+  * [503 Service Unavailable](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/503) – Service unavailable (e.g., no more space for transmit-sequences).
+* **Response Headers:**
+  * **Location** – URI of the newly created transmit sequence.
+
+A transmission sequence has the following format.
+
+| type              | *object*                                                                                               |
+|-------------------|--------------------------------------------------------------------------------------------------------|
+| properties        |                                                                                                        |
+| - **limit**       | Maximum number of times to transmit the sequence.                                                      |
+| type              | *integer*                                                                                              |
+| maximum           | 4294967294                                                                                             |
+| minimum           | 1                                                                                                      |
+| - **period_ms**   | Period of the full sequence in milliseconds.                                                           |
+| type              | *integer*                                                                                              |
+| minimum           | 1                                                                                                      |
+| - **spacing_ms**  | Spacing between individual frames in the sequence in milliseconds.                                     |
+| type              | *integer*                                                                                              |
+| minimum           | 1                                                                                                      |
+| - **frames**      | type                                                                                                   |
+| items             | type                                                                                                   |
+| properties        |                                                                                                        |
+| - **is_extended** | Is frame ID extended (29-bit) or standard (11-bit).                                                    |
+| type              | *boolean*                                                                                              |
+| - **is_fd**       | Is frame format FD or classic.                                                                         |
+| type              | *boolean*                                                                                              |
+| - **is_rtr_brs**  | RTR for classic CAN, BRS (Bit Rate Switch) for CAN-FD.                                                 |
+| type              | *boolean*                                                                                              |
+| - **id**          | Frame identifier.                                                                                      |
+| type              | *integer*                                                                                              |
+| maximum           | 4294967295                                                                                             |
+| minimum           | 0                                                                                                      |
+| - **data**        | Hexadecimal encoded data payload. Empty string for no data bytes. Dummy bytes to set RTR frame length. |
+| type              | *string*                                                                                               |
+| maxLength         | 128                                                                                                    |
+| pattern           | ^[0-9a-fA-F]\*$                                                                                        |
+
+---
+
+## CAN {channel} transmit {transmit_id}
+
+Read (GET) or remove (DELETE) a transmission sequence by ID of a specific CAN channel.
+
+### GET /api/can/{channel}/transmit/{transmit_id}
+
+**Get transmit sequence by ID**
+
+Gets a transmit sequence by ID.
+
+* **Parameters:**
+  * **channel** (*integer*)
+  * **transmit_id** (*integer*)
+
+**Example request:**
+
+```http
+GET /api/can/{channel}/transmit/{transmit_id} HTTP/1.1
+Host: example.com
+```
+
+* **Status Codes:**
+  * [200 OK](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200) – 
+
+    Transmit sequence details.
+
+    **Example response:**
+    ```http
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    {
+        "limit": 1,
+        "period_ms": 1,
+        "spacing_ms": 1,
+        "frames": [
+            {
+                "is_extended": true,
+                "is_fd": true,
+                "is_rtr_brs": true,
+                "id": 1,
+                "data": "string"
+            }
+        ]
+    }
+    ```
+  * [404 Not Found](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404) – Transmit sequence not found.
+
+### DELETE /api/can/{channel}/transmit/{transmit_id}
+
+**Delete transmit sequence**
+
+Deletes a transmit sequence by ID.
+
+* **Parameters:**
+  * **channel** (*integer*)
+  * **transmit_id** (*integer*)
+* **Status Codes:**
+  * [200 OK](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200) – Transmit sequence deleted.
+  * [404 Not Found](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404) – Transmit sequence not found.
+
+A transmission sequence has the following format.
+
+| type              | *object*                                                                                               |
+|-------------------|--------------------------------------------------------------------------------------------------------|
+| properties        |                                                                                                        |
+| - **limit**       | Maximum number of times to transmit the sequence.                                                      |
+| type              | *integer*                                                                                              |
+| maximum           | 4294967294                                                                                             |
+| minimum           | 1                                                                                                      |
+| - **period_ms**   | Period of the full sequence in milliseconds.                                                           |
+| type              | *integer*                                                                                              |
+| minimum           | 1                                                                                                      |
+| - **spacing_ms**  | Spacing between individual frames in the sequence in milliseconds.                                     |
+| type              | *integer*                                                                                              |
+| minimum           | 1                                                                                                      |
+| - **frames**      | type                                                                                                   |
+| items             | type                                                                                                   |
+| properties        |                                                                                                        |
+| - **is_extended** | Is frame ID extended (29-bit) or standard (11-bit).                                                    |
+| type              | *boolean*                                                                                              |
+| - **is_fd**       | Is frame format FD or classic.                                                                         |
+| type              | *boolean*                                                                                              |
+| - **is_rtr_brs**  | RTR for classic CAN, BRS (Bit Rate Switch) for CAN-FD.                                                 |
+| type              | *boolean*                                                                                              |
+| - **id**          | Frame identifier.                                                                                      |
+| type              | *integer*                                                                                              |
+| maximum           | 4294967295                                                                                             |
+| minimum           | 0                                                                                                      |
+| - **data**        | Hexadecimal encoded data payload. Empty string for no data bytes. Dummy bytes to set RTR frame length. |
+| type              | *string*                                                                                               |
+| maxLength         | 128                                                                                                    |
+| pattern           | ^[0-9a-fA-F]\*$                                                                                        |
+
+---
+
+## CAN {channel} transmit {transmit_id} count
+
+Read (GET) or write (PUT) a transmission sequence `count` value by ID of a specific CAN channel. The `count` value expresses the *progress* of a transmission sequence.
+
+#### NOTE
+The `count` value `0xFFFFFFFF` is reserved for errors (transmission sequence failed to complete).
+
+### GET /api/can/{channel}/transmit/{transmit_id}/count
+
+**Get transmit sequence count**
+
+Returns the current count value of the transmit sequence.
+
+* **Parameters:**
+  * **channel** (*integer*)
+  * **transmit_id** (*integer*)
+
+**Example request:**
+
+```http
+GET /api/can/{channel}/transmit/{transmit_id}/count HTTP/1.1
+Host: example.com
+```
+
+* **Status Codes:**
+  * [200 OK](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200) – 
+
+    Current count value.
+
+    **Example response:**
+    ```http
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+
+    10
+    ```
+  * [404 Not Found](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404) – Transmit sequence not found.
+
+### PUT /api/can/{channel}/transmit/{transmit_id}/count
+
+**Update transmit sequence count**
+
+Updates the count value of an existing transmit sequence.
+
+* **Parameters:**
+  * **channel** (*integer*)
+  * **transmit_id** (*integer*)
+
+**Example request:**
+
+```http
+PUT /api/can/{channel}/transmit/{transmit_id}/count HTTP/1.1
+Host: example.com
+Content-Type: application/json
+
+10
+```
+
+* **Status Codes:**
+  * [200 OK](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/200) – Transmit sequence count updated.
+  * [400 Bad Request](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/400) – Bad request (invalid count value/format).
+  * [404 Not Found](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/404) – Transmit sequence not found.
+
+The GET response has the following format.
+
+|         | Valid count range (0xFFFFFFFF is error value).   |
+|---------|--------------------------------------------------|
+| type    | *integer*                                        |
+| maximum | 4294967295                                       |
+| minimum | 0                                                |
+
+The PUT request body has the following format.
+
+|         | Valid count range  (0xFFFFFFFF error value excluded).   |
+|---------|---------------------------------------------------------|
+| type    | *integer*                                               |
+| maximum | 4294967294                                              |
+| minimum | 0                                                       |
+
+
+# api_rest_playground.html.md
+
+
+
+# api_ws.html.md
+
+# WebSocket API
+
+The WebSocket API is used for transfer of CAN bus frames between the connected client and the CANsub.4.
+
+#### NOTE
+Device configuration and state monitoring are done via the [REST API](api_rest.md#rest-api).
+
+---
+
+## WebSocket usage
+
+The `/api/can/{channel}/ws` endpoints (one for each physical channel) accept WebSocket upgrades. The WebSocket connections operate in **binary mode** only. The format of the binary data is described below.
+
+**Connecting a WebSocket opens the associated CAN bus (channel) on the device. Disconnecting closes the channel.**
+
+The connection is bidirectional:
+
+- **CANsub → Client**: the CANsub sends received CAN frames, CAN transmission acknowledgements, and CAN error frames.
+- **Client → CANsub**: the client sends CAN frames to be transmitted on a physical CAN bus.
+
+### Receive
+
+Receiving data from the WebSocket is illustrated (simplified) below. Reception follows the steps (explained in more details below):
+
+1. Read bytes from WebSocket until a start and end boundary byte is found.
+2. Perform byte de-stuffing and remove boundary bytes.
+3. Validate CRC32.
+4. Perform CAN frame deserialization until no more bytes.
+
+### Transmit
+
+Transmitting data to the WebSocket is illustrated (simplified) below. Transmission follows the steps (explained in more details below):
+
+1. Serialize CAN frames.
+2. Calculate CRC32.
+3. Perform byte stuffing and add boundary bytes.
+4. Write bytes to WebSocket<sup>[1](#fn-websocket-max)</sup>.
+
+---
+
+## Framing
+
+Each WebSocket binary message contains one or more serialized CAN frames. Framing provides message boundary detection, payload integrity verification, and byte-stuffing.
+
+#### Binary message structure
+
+| Boundary byte   | Payload           | CRC32   | Boundary byte   |
+|-----------------|-------------------|---------|-----------------|
+| `0x7E`          | N bytes (stuffed) | 4 B     | `0x7E`          |
+- `0x7E` marks the start and end of each binary message.
+- *payload*: one or more serialized CAN frames concatenated (see [Serialization]()).
+- *CRC32*: IEEE 802.3 CRC32 (polynomial `0xEDB88320`) computed over the raw (un-stuffed) payload bytes, appended big-endian.
+- Byte-stuffing is applied to all bytes between the boundary bytes (payload + CRC32 bytes).
+
+### Byte-stuffing
+
+Byte-stuffing ensures that boundary byte (`0x7E`) does not appear in the message body. Before transmission, every payload and CRC32 byte is stuffed.
+
+#### Byte-stuffing substitutions
+
+| Original   | Encoded sequence   |
+|------------|--------------------|
+| `0x7E`     | `0x7D` `0x5E`      |
+| `0x7D`     | `0x7D` `0x5D`      |
+
+The escape byte `0x7D` is always followed by the original byte XOR `0x20`. On decoding, each `0x7D` causes the next byte to be XOR-ed with `0x20` to recover the original value.
+
+---
+
+## Serialization
+
+CAN bus frames are serialized as specified below.
+
+#### `CB`: Classical-Base, `CE`: Classical-Extended, `FB`: FD-Base, `FE`: FD-Extended, `ER`: Error
+
+|     |           |        |     |     |     |     |        |    |    |    |    |    |    |   Byte |   0-5 |   6 |   7 | 8   | 9   | 10   |
+|-----|-----------|--------|-----|-----|-----|-----|--------|----|----|----|----|----|----|--------|-------|-----|-----|-----|-----|------|
+| Bit | 47-0      | 7      | 6   | 5   | 4   | 3   | 2      |  1 |  0 | 7  |  6 | 5  | 4  |      3 |     2 |   1 |   0 | 7-0 | 7-0 | 7-0  |
+| CB  | timestamp | fdr(0) | rtr | 0   | tx  | dlc | ide(0) |  0 |  0 | 0  |  0 | id | -  |        |       |     |     |     |     |      |
+| CE  | timestamp | fdr(0) | rtr | 0   | tx  | dlc | ide(1) |  0 |  0 | id |    |    |    |        |       |     |     |     |     |      |
+| FB  | timestamp | fdr(1) | brs | esi | tx  | dlc | ide(0) |  0 |  0 | 0  |  0 | id | -  |        |       |     |     |     |     |      |
+| FE  | timestamp | fdr(1) | brs | esi | tx  | dlc | ide(1) |  0 |  0 | id |    |    |    |        |       |     |     |     |     |      |
+| ER  | timestamp | 0      | 0   | 1   | err | -   |        |    |    |    |    |    |    |        |       |     |     |     |     |      |
+- `timestamp`: Timestamp in microseconds since 2025/01/01 00:00:00 UTC (offset: 1735689600000000 µs)
+- `fdr`: FD Format Indicator
+- `rtr`: Remote Transmission Request
+- `brs`: Bit Rate Switch
+- `esi`: Error State Indicator
+- `tx`: Transmission Acknowledgement
+- `dlc`: DLC
+- `ide`: Identifier Extension
+- `id`:  Identifier
+- `err`: Error Frame
+  > - `0`: Bit (bit0/bit1)
+  > - `1`: Ack
+  > - `2`: Form
+  > - `3`: Stuff
+  > - `4`: Crc
+
+---
+
+## Examples
+
+### Single CAN frame
+
+Encoding of a *CB* CAN frame with the following parameters:
+
+- Timestamp: `43200123456` (2025/01/01 12:0:0.123456 in us since timestamp offset)
+- ID: `1`
+- Data: `0xAA`, `0xBB`
+
+The serialized CAN frame becomes: `000A0EED9240020001AABB`.
+
+The resulting binary message becomes: `7E000A0EED9240020001AABBA8E4A04E7E`.
+
+### Multiple CAN frames
+
+Encoding of two *CB* CAN frames with the following parameters:
+
+- CAN frame 1:
+  > - Timestamp: `43200123456` (2025/01/01 12:0:0.123456 in us since timestamp offset)
+  > - ID: `1`
+  > - Data: `0xAA`, `0xBB`
+- CAN frame 2:
+  > - Timestamp: `31579200123456` (2026/01/01 12:0:0.123456 in us since timestamp offset)
+  > - ID: `2`
+  > - Data: `0xCC`, `0xDD`
+
+The serialized CAN frames become: `000A0EED9240020001AABB1CB89B017240020002CCDD`.
+
+The resulting binary message becomes: `7E000A0EED9240020001AABB1CB89B017240020002CCDD77F29EFD7E`.
+
+---
+* <a id='fn-websocket-max'>**[1]**</a> WebSocket binary messages should not exceed one ethernet frame (~ 1400 bytes).
+
+
+# bit_timing.html.md
+
+# Bit-timing
+
+Below table provides a list of bit-timing configurations suitable for the CANsub.4 (running a 80 MHz CAN clock).
+
+#### Bit-timing configurations
+
+| NBR (bit/s)   | DBR (bit/s)   | SP (%)   |   BRP |   NSEG1 |   NSEG2 |   NSJW |   DSEG1 |   DSEG2 |   DSJW |
+|---------------|---------------|----------|-------|---------|---------|--------|---------|---------|--------|
+| 1.000.000     | 5.000.000     | 87.5%    |     1 |      69 |      10 |      4 |      13 |       2 |      2 |
+| 1.000.000     | 5.000.000     | 81.2%    |     1 |      64 |      15 |      4 |      12 |       3 |      3 |
+| 1.000.000     | 5.000.000     | 75.0%    |     1 |      59 |      20 |      4 |      11 |       4 |      4 |
+| 1.000.000     | 5.000.000     | 68.8%    |     1 |      54 |      25 |      4 |      10 |       5 |      4 |
+| 1.000.000     | 5.000.000     | 62.5%    |     1 |      49 |      30 |      4 |       9 |       6 |      4 |
+| 1.000.000     | 5.000.000     | 56.2%    |     1 |      44 |      35 |      4 |       8 |       7 |      4 |
+| 1.000.000     | 5.000.000     | 50.0%    |     1 |      39 |      40 |      4 |       7 |       8 |      4 |
+| 1.000.000     | 4.000.000     | 90.0%    |     1 |      71 |       8 |      4 |      17 |       2 |      2 |
+| 1.000.000     | 4.000.000     | 85.0%    |     1 |      67 |      12 |      4 |      16 |       3 |      3 |
+| 1.000.000     | 4.000.000     | 80.0%    |     1 |      63 |      16 |      4 |      15 |       4 |      4 |
+| 1.000.000     | 4.000.000     | 75.0%    |     1 |      59 |      20 |      4 |      14 |       5 |      4 |
+| 1.000.000     | 4.000.000     | 70.0%    |     1 |      55 |      24 |      4 |      13 |       6 |      4 |
+| 1.000.000     | 4.000.000     | 65.0%    |     1 |      51 |      28 |      4 |      12 |       7 |      4 |
+| 1.000.000     | 4.000.000     | 60.0%    |     1 |      47 |      32 |      4 |      11 |       8 |      4 |
+| 1.000.000     | 4.000.000     | 55.0%    |     1 |      43 |      36 |      4 |      10 |       9 |      4 |
+| 1.000.000     | 4.000.000     | 50.0%    |     1 |      39 |      40 |      4 |       9 |      10 |      4 |
+| 1.000.000     | 2.000.000     | 90.0%    |     2 |      35 |       4 |      4 |      17 |       2 |      2 |
+| 1.000.000     | 2.000.000     | 85.0%    |     2 |      33 |       6 |      4 |      16 |       3 |      3 |
+| 1.000.000     | 2.000.000     | 80.0%    |     2 |      31 |       8 |      4 |      15 |       4 |      4 |
+| 1.000.000     | 2.000.000     | 75.0%    |     2 |      29 |      10 |      4 |      14 |       5 |      4 |
+| 1.000.000     | 2.000.000     | 70.0%    |     2 |      27 |      12 |      4 |      13 |       6 |      4 |
+| 1.000.000     | 2.000.000     | 65.0%    |     2 |      25 |      14 |      4 |      12 |       7 |      4 |
+| 1.000.000     | 2.000.000     | 62.5%    |     5 |       9 |       6 |      4 |       4 |       3 |      3 |
+| 1.000.000     | 2.000.000     | 60.0%    |     2 |      23 |      16 |      4 |      11 |       8 |      4 |
+| 1.000.000     | 2.000.000     | 55.0%    |     2 |      21 |      18 |      4 |      10 |       9 |      4 |
+| 1.000.000     | 2.000.000     | 50.0%    |     2 |      19 |      20 |      4 |       9 |      10 |      4 |
+| 1.000.000     | 1.000.000     | 90.0%    |     4 |      17 |       2 |      2 |      17 |       2 |      2 |
+| 1.000.000     | 1.000.000     | 87.5%    |     5 |      13 |       2 |      2 |      13 |       2 |      2 |
+| 1.000.000     | 1.000.000     | 85.0%    |     4 |      16 |       3 |      3 |      16 |       3 |      3 |
+| 1.000.000     | 1.000.000     | 81.2%    |     5 |      12 |       3 |      3 |      12 |       3 |      3 |
+| 1.000.000     | 1.000.000     | 80.0%    |     4 |      15 |       4 |      4 |      15 |       4 |      4 |
+| 1.000.000     | 1.000.000     | 75.0%    |     4 |      14 |       5 |      4 |      14 |       5 |      4 |
+| 1.000.000     | 1.000.000     | 70.0%    |     4 |      13 |       6 |      4 |      13 |       6 |      4 |
+| 1.000.000     | 1.000.000     | 68.8%    |     5 |      10 |       5 |      4 |      10 |       5 |      4 |
+| 1.000.000     | 1.000.000     | 65.0%    |     4 |      12 |       7 |      4 |      12 |       7 |      4 |
+| 1.000.000     | 1.000.000     | 62.5%    |     5 |       9 |       6 |      4 |       9 |       6 |      4 |
+| 1.000.000     | 1.000.000     | 60.0%    |     4 |      11 |       8 |      4 |      11 |       8 |      4 |
+| 1.000.000     | 1.000.000     | 56.2%    |     5 |       8 |       7 |      4 |       8 |       7 |      4 |
+| 1.000.000     | 1.000.000     | 55.0%    |     4 |      10 |       9 |      4 |      10 |       9 |      4 |
+| 1.000.000     | 1.000.000     | 50.0%    |     4 |       9 |      10 |      4 |       9 |      10 |      4 |
+| 800.000       | 5.000.000     | 75.0%    |     1 |      74 |      25 |      4 |      11 |       4 |      4 |
+| 800.000       | 5.000.000     | 50.0%    |     1 |      49 |      50 |      4 |       7 |       8 |      4 |
+| 800.000       | 4.000.000     | 90.0%    |     1 |      89 |      10 |      4 |      17 |       2 |      2 |
+| 800.000       | 4.000.000     | 85.0%    |     1 |      84 |      15 |      4 |      16 |       3 |      3 |
+| 800.000       | 4.000.000     | 80.0%    |     1 |      79 |      20 |      4 |      15 |       4 |      4 |
+| 800.000       | 4.000.000     | 75.0%    |     1 |      74 |      25 |      4 |      14 |       5 |      4 |
+| 800.000       | 4.000.000     | 70.0%    |     1 |      69 |      30 |      4 |      13 |       6 |      4 |
+| 800.000       | 4.000.000     | 65.0%    |     1 |      64 |      35 |      4 |      12 |       7 |      4 |
+| 800.000       | 4.000.000     | 60.0%    |     1 |      59 |      40 |      4 |      11 |       8 |      4 |
+| 800.000       | 4.000.000     | 55.0%    |     1 |      54 |      45 |      4 |      10 |       9 |      4 |
+| 800.000       | 4.000.000     | 50.0%    |     1 |      49 |      50 |      4 |       9 |      10 |      4 |
+| 800.000       | 2.000.000     | 90.0%    |     2 |      44 |       5 |      4 |      17 |       2 |      2 |
+| 800.000       | 2.000.000     | 80.0%    |     2 |      39 |      10 |      4 |      15 |       4 |      4 |
+| 800.000       | 2.000.000     | 75.0%    |     5 |      14 |       5 |      4 |       5 |       2 |      2 |
+| 800.000       | 2.000.000     | 70.0%    |     2 |      34 |      15 |      4 |      13 |       6 |      4 |
+| 800.000       | 2.000.000     | 60.0%    |     2 |      29 |      20 |      4 |      11 |       8 |      4 |
+| 800.000       | 2.000.000     | 50.0%    |     2 |      24 |      25 |      4 |       9 |      10 |      4 |
+| 800.000       | 1.000.000     | 80.0%    |     4 |      19 |       5 |      4 |      15 |       4 |      4 |
+| 800.000       | 1.000.000     | 75.0%    |     5 |      14 |       5 |      4 |      11 |       4 |      4 |
+| 800.000       | 1.000.000     | 60.0%    |     4 |      14 |      10 |      4 |      11 |       8 |      4 |
+| 800.000       | 1.000.000     | 50.0%    |     5 |       9 |      10 |      4 |       7 |       8 |      4 |
+| 500.000       | 5.000.000     | 87.5%    |     1 |     139 |      20 |      4 |      13 |       2 |      2 |
+| 500.000       | 5.000.000     | 81.2%    |     1 |     129 |      30 |      4 |      12 |       3 |      3 |
+| 500.000       | 5.000.000     | 75.0%    |     1 |     119 |      40 |      4 |      11 |       4 |      4 |
+| 500.000       | 5.000.000     | 68.8%    |     1 |     109 |      50 |      4 |      10 |       5 |      4 |
+| 500.000       | 5.000.000     | 62.5%    |     1 |      99 |      60 |      4 |       9 |       6 |      4 |
+| 500.000       | 5.000.000     | 56.2%    |     1 |      89 |      70 |      4 |       8 |       7 |      4 |
+| 500.000       | 5.000.000     | 50.0%    |     1 |      79 |      80 |      4 |       7 |       8 |      4 |
+| 500.000       | 4.000.000     | 90.0%    |     1 |     143 |      16 |      4 |      17 |       2 |      2 |
+| 500.000       | 4.000.000     | 85.0%    |     1 |     135 |      24 |      4 |      16 |       3 |      3 |
+| 500.000       | 4.000.000     | 80.0%    |     1 |     127 |      32 |      4 |      15 |       4 |      4 |
+| 500.000       | 4.000.000     | 75.0%    |     1 |     119 |      40 |      4 |      14 |       5 |      4 |
+| 500.000       | 4.000.000     | 70.0%    |     1 |     111 |      48 |      4 |      13 |       6 |      4 |
+| 500.000       | 4.000.000     | 65.0%    |     1 |     103 |      56 |      4 |      12 |       7 |      4 |
+| 500.000       | 4.000.000     | 60.0%    |     1 |      95 |      64 |      4 |      11 |       8 |      4 |
+| 500.000       | 4.000.000     | 55.0%    |     1 |      87 |      72 |      4 |      10 |       9 |      4 |
+| 500.000       | 4.000.000     | 50.0%    |     1 |      79 |      80 |      4 |       9 |      10 |      4 |
+| 500.000       | 2.000.000     | 90.0%    |     2 |      71 |       8 |      4 |      17 |       2 |      2 |
+| 500.000       | 2.000.000     | 85.0%    |     2 |      67 |      12 |      4 |      16 |       3 |      3 |
+| 500.000       | 2.000.000     | 80.0%    |     2 |      63 |      16 |      4 |      15 |       4 |      4 |
+| 500.000       | 2.000.000     | 75.0%    |     2 |      59 |      20 |      4 |      14 |       5 |      4 |
+| 500.000       | 2.000.000     | 70.0%    |     2 |      55 |      24 |      4 |      13 |       6 |      4 |
+| 500.000       | 2.000.000     | 65.0%    |     2 |      51 |      28 |      4 |      12 |       7 |      4 |
+| 500.000       | 2.000.000     | 62.5%    |     5 |      19 |      12 |      4 |       4 |       3 |      3 |
+| 500.000       | 2.000.000     | 60.0%    |     2 |      47 |      32 |      4 |      11 |       8 |      4 |
+| 500.000       | 2.000.000     | 55.0%    |     2 |      43 |      36 |      4 |      10 |       9 |      4 |
+| 500.000       | 2.000.000     | 50.0%    |     2 |      39 |      40 |      4 |       9 |      10 |      4 |
+| 500.000       | 1.000.000     | 90.0%    |     4 |      35 |       4 |      4 |      17 |       2 |      2 |
+| 500.000       | 1.000.000     | 87.5%    |     5 |      27 |       4 |      4 |      13 |       2 |      2 |
+| 500.000       | 1.000.000     | 85.0%    |     4 |      33 |       6 |      4 |      16 |       3 |      3 |
+| 500.000       | 1.000.000     | 81.2%    |     5 |      25 |       6 |      4 |      12 |       3 |      3 |
+| 500.000       | 1.000.000     | 80.0%    |     4 |      31 |       8 |      4 |      15 |       4 |      4 |
+| 500.000       | 1.000.000     | 75.0%    |     4 |      29 |      10 |      4 |      14 |       5 |      4 |
+| 500.000       | 1.000.000     | 70.0%    |     4 |      27 |      12 |      4 |      13 |       6 |      4 |
+| 500.000       | 1.000.000     | 68.8%    |     5 |      21 |      10 |      4 |      10 |       5 |      4 |
+| 500.000       | 1.000.000     | 65.0%    |     4 |      25 |      14 |      4 |      12 |       7 |      4 |
+| 500.000       | 1.000.000     | 62.5%    |     5 |      19 |      12 |      4 |       9 |       6 |      4 |
+| 500.000       | 1.000.000     | 60.0%    |     4 |      23 |      16 |      4 |      11 |       8 |      4 |
+| 500.000       | 1.000.000     | 56.2%    |     5 |      17 |      14 |      4 |       8 |       7 |      4 |
+| 500.000       | 1.000.000     | 55.0%    |     4 |      21 |      18 |      4 |      10 |       9 |      4 |
+| 500.000       | 1.000.000     | 50.0%    |     4 |      19 |      20 |      4 |       9 |      10 |      4 |
+| 250.000       | 5.000.000     | 75.0%    |     1 |     239 |      80 |      4 |      11 |       4 |      4 |
+| 250.000       | 5.000.000     | 68.8%    |     1 |     219 |     100 |      4 |      10 |       5 |      4 |
+| 250.000       | 5.000.000     | 62.5%    |     1 |     199 |     120 |      4 |       9 |       6 |      4 |
+| 250.000       | 5.000.000     | 50.0%    |     2 |      79 |      80 |      4 |       3 |       4 |      4 |
+| 250.000       | 4.000.000     | 80.0%    |     1 |     255 |      64 |      4 |      15 |       4 |      4 |
+| 250.000       | 4.000.000     | 75.0%    |     1 |     239 |      80 |      4 |      14 |       5 |      4 |
+| 250.000       | 4.000.000     | 70.0%    |     1 |     223 |      96 |      4 |      13 |       6 |      4 |
+| 250.000       | 4.000.000     | 65.0%    |     1 |     207 |     112 |      4 |      12 |       7 |      4 |
+| 250.000       | 4.000.000     | 60.0%    |     1 |     191 |     128 |      4 |      11 |       8 |      4 |
+| 250.000       | 4.000.000     | 50.0%    |     2 |      79 |      80 |      4 |       4 |       5 |      4 |
+| 250.000       | 2.000.000     | 90.0%    |     2 |     143 |      16 |      4 |      17 |       2 |      2 |
+| 250.000       | 2.000.000     | 85.0%    |     2 |     135 |      24 |      4 |      16 |       3 |      3 |
+| 250.000       | 2.000.000     | 80.0%    |     2 |     127 |      32 |      4 |      15 |       4 |      4 |
+| 250.000       | 2.000.000     | 75.0%    |     2 |     119 |      40 |      4 |      14 |       5 |      4 |
+| 250.000       | 2.000.000     | 70.0%    |     2 |     111 |      48 |      4 |      13 |       6 |      4 |
+| 250.000       | 2.000.000     | 65.0%    |     2 |     103 |      56 |      4 |      12 |       7 |      4 |
+| 250.000       | 2.000.000     | 62.5%    |     5 |      39 |      24 |      4 |       4 |       3 |      3 |
+| 250.000       | 2.000.000     | 60.0%    |     2 |      95 |      64 |      4 |      11 |       8 |      4 |
+| 250.000       | 2.000.000     | 55.0%    |     2 |      87 |      72 |      4 |      10 |       9 |      4 |
+| 250.000       | 2.000.000     | 50.0%    |     2 |      79 |      80 |      4 |       9 |      10 |      4 |
+| 250.000       | 1.000.000     | 90.0%    |     4 |      71 |       8 |      4 |      17 |       2 |      2 |
+| 250.000       | 1.000.000     | 87.5%    |     5 |      55 |       8 |      4 |      13 |       2 |      2 |
+| 250.000       | 1.000.000     | 85.0%    |     4 |      67 |      12 |      4 |      16 |       3 |      3 |
+| 250.000       | 1.000.000     | 81.2%    |     5 |      51 |      12 |      4 |      12 |       3 |      3 |
+| 250.000       | 1.000.000     | 80.0%    |     4 |      63 |      16 |      4 |      15 |       4 |      4 |
+| 250.000       | 1.000.000     | 75.0%    |     4 |      59 |      20 |      4 |      14 |       5 |      4 |
+| 250.000       | 1.000.000     | 70.0%    |     4 |      55 |      24 |      4 |      13 |       6 |      4 |
+| 250.000       | 1.000.000     | 68.8%    |     5 |      43 |      20 |      4 |      10 |       5 |      4 |
+| 250.000       | 1.000.000     | 65.0%    |     4 |      51 |      28 |      4 |      12 |       7 |      4 |
+| 250.000       | 1.000.000     | 62.5%    |     5 |      39 |      24 |      4 |       9 |       6 |      4 |
+| 250.000       | 1.000.000     | 60.0%    |     4 |      47 |      32 |      4 |      11 |       8 |      4 |
+| 250.000       | 1.000.000     | 56.2%    |     5 |      35 |      28 |      4 |       8 |       7 |      4 |
+| 250.000       | 1.000.000     | 55.0%    |     4 |      43 |      36 |      4 |      10 |       9 |      4 |
+| 250.000       | 1.000.000     | 50.0%    |     4 |      39 |      40 |      4 |       9 |      10 |      4 |
+| 200.000       | 5.000.000     | 75.0%    |     2 |     149 |      50 |      4 |       5 |       2 |      2 |
+| 200.000       | 5.000.000     | 62.5%    |     2 |     124 |      75 |      4 |       4 |       3 |      3 |
+| 200.000       | 5.000.000     | 50.0%    |     2 |      99 |     100 |      4 |       3 |       4 |      4 |
+| 200.000       | 4.000.000     | 80.0%    |     2 |     159 |      40 |      4 |       7 |       2 |      2 |
+| 200.000       | 4.000.000     | 70.0%    |     2 |     139 |      60 |      4 |       6 |       3 |      3 |
+| 200.000       | 4.000.000     | 60.0%    |     2 |     119 |      80 |      4 |       5 |       4 |      4 |
+| 200.000       | 4.000.000     | 50.0%    |     2 |      99 |     100 |      4 |       4 |       5 |      4 |
+| 200.000       | 2.000.000     | 90.0%    |     2 |     179 |      20 |      4 |      17 |       2 |      2 |
+| 200.000       | 2.000.000     | 85.0%    |     2 |     169 |      30 |      4 |      16 |       3 |      3 |
+| 200.000       | 2.000.000     | 80.0%    |     2 |     159 |      40 |      4 |      15 |       4 |      4 |
+| 200.000       | 2.000.000     | 75.0%    |     2 |     149 |      50 |      4 |      14 |       5 |      4 |
+| 200.000       | 2.000.000     | 70.0%    |     2 |     139 |      60 |      4 |      13 |       6 |      4 |
+| 200.000       | 2.000.000     | 65.0%    |     2 |     129 |      70 |      4 |      12 |       7 |      4 |
+| 200.000       | 2.000.000     | 62.5%    |     5 |      49 |      30 |      4 |       4 |       3 |      3 |
+| 200.000       | 2.000.000     | 60.0%    |     2 |     119 |      80 |      4 |      11 |       8 |      4 |
+| 200.000       | 2.000.000     | 55.0%    |     2 |     109 |      90 |      4 |      10 |       9 |      4 |
+| 200.000       | 2.000.000     | 50.0%    |     2 |      99 |     100 |      4 |       9 |      10 |      4 |
+| 200.000       | 1.000.000     | 90.0%    |     4 |      89 |      10 |      4 |      17 |       2 |      2 |
+| 200.000       | 1.000.000     | 87.5%    |     5 |      69 |      10 |      4 |      13 |       2 |      2 |
+| 200.000       | 1.000.000     | 85.0%    |     4 |      84 |      15 |      4 |      16 |       3 |      3 |
+| 200.000       | 1.000.000     | 81.2%    |     5 |      64 |      15 |      4 |      12 |       3 |      3 |
+| 200.000       | 1.000.000     | 80.0%    |     4 |      79 |      20 |      4 |      15 |       4 |      4 |
+| 200.000       | 1.000.000     | 75.0%    |     4 |      74 |      25 |      4 |      14 |       5 |      4 |
+| 200.000       | 1.000.000     | 70.0%    |     4 |      69 |      30 |      4 |      13 |       6 |      4 |
+| 200.000       | 1.000.000     | 68.8%    |     5 |      54 |      25 |      4 |      10 |       5 |      4 |
+| 200.000       | 1.000.000     | 65.0%    |     4 |      64 |      35 |      4 |      12 |       7 |      4 |
+| 200.000       | 1.000.000     | 62.5%    |     5 |      49 |      30 |      4 |       9 |       6 |      4 |
+| 200.000       | 1.000.000     | 60.0%    |     4 |      59 |      40 |      4 |      11 |       8 |      4 |
+| 200.000       | 1.000.000     | 56.2%    |     5 |      44 |      35 |      4 |       8 |       7 |      4 |
+| 200.000       | 1.000.000     | 55.0%    |     4 |      54 |      45 |      4 |      10 |       9 |      4 |
+| 200.000       | 1.000.000     | 50.0%    |     4 |      49 |      50 |      4 |       9 |      10 |      4 |
+| 125.000       | 5.000.000     | 75.0%    |     2 |     239 |      80 |      4 |       5 |       2 |      2 |
+| 125.000       | 5.000.000     | 62.5%    |     2 |     199 |     120 |      4 |       4 |       3 |      3 |
+| 125.000       | 4.000.000     | 80.0%    |     2 |     255 |      64 |      4 |       7 |       2 |      2 |
+| 125.000       | 4.000.000     | 70.0%    |     2 |     223 |      96 |      4 |       6 |       3 |      3 |
+| 125.000       | 4.000.000     | 60.0%    |     2 |     191 |     128 |      4 |       5 |       4 |      4 |
+| 125.000       | 2.000.000     | 80.0%    |     2 |     255 |      64 |      4 |      15 |       4 |      4 |
+| 125.000       | 2.000.000     | 75.0%    |     2 |     239 |      80 |      4 |      14 |       5 |      4 |
+| 125.000       | 2.000.000     | 70.0%    |     2 |     223 |      96 |      4 |      13 |       6 |      4 |
+| 125.000       | 2.000.000     | 65.0%    |     2 |     207 |     112 |      4 |      12 |       7 |      4 |
+| 125.000       | 2.000.000     | 62.5%    |     5 |      79 |      48 |      4 |       4 |       3 |      3 |
+| 125.000       | 2.000.000     | 60.0%    |     2 |     191 |     128 |      4 |      11 |       8 |      4 |
+| 125.000       | 2.000.000     | 50.0%    |     4 |      79 |      80 |      4 |       4 |       5 |      4 |
+| 125.000       | 1.000.000     | 90.0%    |     4 |     143 |      16 |      4 |      17 |       2 |      2 |
+| 125.000       | 1.000.000     | 87.5%    |     5 |     111 |      16 |      4 |      13 |       2 |      2 |
+| 125.000       | 1.000.000     | 85.0%    |     4 |     135 |      24 |      4 |      16 |       3 |      3 |
+| 125.000       | 1.000.000     | 81.2%    |     5 |     103 |      24 |      4 |      12 |       3 |      3 |
+| 125.000       | 1.000.000     | 80.0%    |     4 |     127 |      32 |      4 |      15 |       4 |      4 |
+| 125.000       | 1.000.000     | 75.0%    |     4 |     119 |      40 |      4 |      14 |       5 |      4 |
+| 125.000       | 1.000.000     | 70.0%    |     4 |     111 |      48 |      4 |      13 |       6 |      4 |
+| 125.000       | 1.000.000     | 68.8%    |     5 |      87 |      40 |      4 |      10 |       5 |      4 |
+| 125.000       | 1.000.000     | 65.0%    |     4 |     103 |      56 |      4 |      12 |       7 |      4 |
+| 125.000       | 1.000.000     | 62.5%    |     5 |      79 |      48 |      4 |       9 |       6 |      4 |
+| 125.000       | 1.000.000     | 60.0%    |     4 |      95 |      64 |      4 |      11 |       8 |      4 |
+| 125.000       | 1.000.000     | 56.2%    |     5 |      71 |      56 |      4 |       8 |       7 |      4 |
+| 125.000       | 1.000.000     | 55.0%    |     4 |      87 |      72 |      4 |      10 |       9 |      4 |
+| 125.000       | 1.000.000     | 50.0%    |     4 |      79 |      80 |      4 |       9 |      10 |      4 |
+| 100.000       | 4.000.000     | 60.0%    |     4 |     119 |      80 |      4 |       2 |       2 |      2 |
+| 100.000       | 2.000.000     | 80.0%    |     4 |     159 |      40 |      4 |       7 |       2 |      2 |
+| 100.000       | 2.000.000     | 75.0%    |     5 |     119 |      40 |      4 |       5 |       2 |      2 |
+| 100.000       | 2.000.000     | 70.0%    |     4 |     139 |      60 |      4 |       6 |       3 |      3 |
+| 100.000       | 2.000.000     | 62.5%    |     5 |      99 |      60 |      4 |       4 |       3 |      3 |
+| 100.000       | 2.000.000     | 60.0%    |     4 |     119 |      80 |      4 |       5 |       4 |      4 |
+| 100.000       | 2.000.000     | 50.0%    |     4 |      99 |     100 |      4 |       4 |       5 |      4 |
+| 100.000       | 1.000.000     | 90.0%    |     4 |     179 |      20 |      4 |      17 |       2 |      2 |
+| 100.000       | 1.000.000     | 87.5%    |     5 |     139 |      20 |      4 |      13 |       2 |      2 |
+| 100.000       | 1.000.000     | 85.0%    |     4 |     169 |      30 |      4 |      16 |       3 |      3 |
+| 100.000       | 1.000.000     | 81.2%    |     5 |     129 |      30 |      4 |      12 |       3 |      3 |
+| 100.000       | 1.000.000     | 80.0%    |     4 |     159 |      40 |      4 |      15 |       4 |      4 |
+| 100.000       | 1.000.000     | 75.0%    |     4 |     149 |      50 |      4 |      14 |       5 |      4 |
+| 100.000       | 1.000.000     | 70.0%    |     4 |     139 |      60 |      4 |      13 |       6 |      4 |
+| 100.000       | 1.000.000     | 68.8%    |     5 |     109 |      50 |      4 |      10 |       5 |      4 |
+| 100.000       | 1.000.000     | 65.0%    |     4 |     129 |      70 |      4 |      12 |       7 |      4 |
+| 100.000       | 1.000.000     | 62.5%    |     5 |      99 |      60 |      4 |       9 |       6 |      4 |
+| 100.000       | 1.000.000     | 60.0%    |     4 |     119 |      80 |      4 |      11 |       8 |      4 |
+| 100.000       | 1.000.000     | 56.2%    |     5 |      89 |      70 |      4 |       8 |       7 |      4 |
+| 100.000       | 1.000.000     | 55.0%    |     4 |     109 |      90 |      4 |      10 |       9 |      4 |
+| 100.000       | 1.000.000     | 50.0%    |     4 |      99 |     100 |      4 |       9 |      10 |      4 |
+| 50.000        | 2.000.000     | 75.0%    |     5 |     239 |      80 |      4 |       5 |       2 |      2 |
+| 50.000        | 2.000.000     | 62.5%    |     5 |     199 |     120 |      4 |       4 |       3 |      3 |
+| 50.000        | 2.000.000     | 60.0%    |     8 |     119 |      80 |      4 |       2 |       2 |      2 |
+| 50.000        | 1.000.000     | 80.0%    |     8 |     159 |      40 |      4 |       7 |       2 |      2 |
+| 50.000        | 1.000.000     | 75.0%    |     5 |     239 |      80 |      4 |      11 |       4 |      4 |
+| 50.000        | 1.000.000     | 70.0%    |     8 |     139 |      60 |      4 |       6 |       3 |      3 |
+| 50.000        | 1.000.000     | 68.8%    |     5 |     219 |     100 |      4 |      10 |       5 |      4 |
+| 50.000        | 1.000.000     | 62.5%    |     5 |     199 |     120 |      4 |       9 |       6 |      4 |
+| 50.000        | 1.000.000     | 60.0%    |     8 |     119 |      80 |      4 |       5 |       4 |      4 |
+| 50.000        | 1.000.000     | 50.0%    |     8 |      99 |     100 |      4 |       4 |       5 |      4 |
+
+
+# connector.html.md
+
+# Connectors
+
+The CANsub.4 has the following physical connectors.
+
+---
+
+## USB and RJ45
+
+The CANsub.4 uses a USB-C port for power. Data can be transferred using either the USB-C port or the RJ45 port (Ethernet) (see [Device connection](../connection/index.md#device-connection)).
+
+![image](hardware/connector/cansub_power_data.png)
+
+---
+
+## CAN bus
+
+#### WARNING
+A galvanically isolated CAN bus must connect the isolated ground pin to the ground of the connected bus.
+
+The CANsub.4 uses one DB25 port for the four galvanically isolated CAN buses.
+
+![image](hardware/connector/cansub4_buses.png)
+
+#### CANsub.4 DB25 pinout.
+
+| Bus          | Function   |   Pin # |
+|--------------|------------|---------|
+| CH1          | CAN-H      |      12 |
+| CAN-L        | 13         |         |
+| Isolated GND | 25         |         |
+| CH2          | CAN-H      |      22 |
+| CAN-L        | 21         |         |
+| Isolated GND | 9          |         |
+| CH3          | CAN-H      |      18 |
+| CAN-L        | 17         |         |
+| Isolated GND | 5          |         |
+| CH4          | CAN-H      |       1 |
+| CAN-L        | 2          |         |
+| Isolated GND | 14         |         |
+
+#### NOTE
+The DB25 connector shield is connected to the device metal enclosure. Avoid connecting it to the isolated buses.
+
+
+# display.html.md
+
+# Display
+
+The CANsub.4 features a 0.96” color LCD display showing the current device state. The display switches between several *layouts* depending on the state of the device.
+
+The display uses the following symbols:
+
+| ![image](hardware/display/symbol-spinner-solid.png)    | Pending connection.                                 |
+|--------------------------------------------------------|-----------------------------------------------------|
+| ![image](hardware/display/symbol-usb-brands-solid.png) | USB connection active (network over USB).           |
+| ![image](hardware/display/symbol-ethernet-solid.png)   | Ethernet connection active (network over Ethernet). |
+| ![image](hardware/display/symbol-arrow-up-solid.png)   | Network uplink activity.                            |
+| ![image](hardware/display/symbol-arrow-down-solid.png) | Network downlink activity.                          |
+
+---
+
+## Top bar
+
+The top bar is persistent and shown regardless of the active layout. It provides the following information:
+
+- Device time (format `DD/MM HH:MM:SS`).
+- State of connector detection (pending/USB/Ethernet).
+- Network uplink/downlink activity.
+
+---
+
+## Information layout
+
+The *information* layout can be activated by pressing the button under the USB-C connector<sup>[1](#fn-info-button)</sup>. The info layout provides the following information:
+
+- `TYP`: Device type (CANsub.4).
+- `ID`: Unique device ID (8-digit hexadecimal value).
+- `HW`: Hardware version.
+- `FW`: Firmware version.
+- `API`: API version.
+- `MAC`: Unique device MAC address (same for USB and Ethernet).
+
+| ![image](hardware/display/cansub_button.png)   | ![image](hardware/display/cansub4_display_inf.bmp)   |
+|------------------------------------------------|------------------------------------------------------|
+
+---
+
+## Connection layout
+
+The *connection* layout is displayed until the network connection is established (USB or Ethernet selected and IP address assigned).
+
+`Detecting inf` (interface) remains empty until either USB or Ethernet is selected for data transfer (see [Device connection](../connection/index.md#device-connection)).
+
+![image](hardware/display/cansub_display_itf.bmp)
+
+`Detecting net` (network) remains empty until an IP address is obtained.
+
+| ![image](hardware/display/cansub_display_itf_usb.bmp)   | ![image](hardware/display/cansub_display_itf_eth.bmp)   |
+|---------------------------------------------------------|---------------------------------------------------------|
+
+---
+
+## Network layout
+
+The *network* layout is displayed once the device network is ready and until a user has connected to the device.
+
+| ![image](hardware/display/cansub_display_net_usb.bmp)   | ![image](hardware/display/cansub_display_net_eth.bmp)   |
+|---------------------------------------------------------|---------------------------------------------------------|
+
+#### NOTE
+If connecting to the device through a browser, prefix the hostname or IP with `https://`.
+
+E.g.:
+
+- `https://aabbccdd-usb.local` / `https://aabbccdd-eth.local`
+- `https://10.121.15.1`
+
+The hostname depends on the active interface (USB / Ethernet).
+
+---
+
+## CAN bus layout
+
+The *CAN bus* layout is displayed once a client connects to the CANsub.4. The layout shows information on all supported physical CAN buses.
+
+![image](hardware/display/cansub4_display_can.bmp)
+
+The example above displays the following bus information:
+
+- **CAN1**: Nominal bit-rate: 250k, Data bit-rate 1M, 312 frames/s.
+- **CAN2**: Nominal bit-rate: 500k, Data bit-rate 1M, 552 frames/s, error-passive.
+- **CAN3**: Nominal bit-rate: 1M, Data bit-rate 2M, 725 frames/s, silent-mode.
+- **CAN4**: Nominal bit-rate: 1M, Data bit-rate 4M, 1446 frames/s, silent-mode.
+
+### Bus state
+
+![image](hardware/display/cansub_display_can_stopped.bmp)![image](hardware/display/cansub_display_can_active.bmp)![image](hardware/display/cansub_display_can_passive.bmp)![image](hardware/display/cansub_display_can_busoff.bmp)![image](hardware/display/cansub_display_can_silent.bmp)
+
+### Bus load
+
+The bar below each bus illustrates the load on the bus in percent.
+
+![image](hardware/display/cansub_display_can_bar.png)
+
+---
+* <a id='fn-info-button'>**[1]**</a> Use a pointed non-conductive tool to activate the button
+
+
+# enclosure.html.md
+
+# Enclosure
+
+The CANsub.4 uses a robust aluminum enclosure with mounting flanges.
+
+![image](hardware/enclosure/cansub_enclosure.png)
+
+[`Drawing (PDF)`](enclosure/cansub4_drawing.pdf) | [`3D model (STEP)`](enclosure/cansub4_3d.zip)
+
+#### WARNING
+Opening the enclosure can permanently damage the device. Improper handling may void the warranty.
+
+
+# label.html.md
+
+# Label
+
+A unique label is attached to each device. An example label is shown below.
+
+![image](hardware/label/cansub_label.png)
+
+The label contains the following information:
+
+- `ID`: Unique device ID (8-digit hexadecimal value).
+- `HW`: Hardware version (`XX.YY`).
+- `DC`: Production date code (`YYYYMM`).
+- `QR`: Production date code, device ID, and device MAC (`YYYYMM;[DEVICE-ID];[DEVICE-MAC]`).
+
+#### NOTE
+The QR-code can be scanned to obtain the device MAC address.
+
+
