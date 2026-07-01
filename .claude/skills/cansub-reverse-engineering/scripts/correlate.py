@@ -31,6 +31,16 @@ import common
 from common import (GRID_HZ, LAG_WINDOW_S, LAG_STEPS, N_WINDOWS,  # noqa: F401
                     _windowed_spearman, _windowed_spearman_signed, plausibility)
 
+# Proxy-suspect flag: a field that rank-tracks the reference this well (Spearman)
+# yet whose linear R^2 falls at least PROXY_GAP below that is monotonic-but-not-linear - a
+# HINT it may be a co-varying proxy (a real field has R^2 ~= Spearman). Keys on the GAP, not
+# an absolute R^2, and is valid only AFTER lag/geometry/sign/saturation are ruled out.
+PROXY_SPEARMAN = 0.90
+PROXY_GAP = 0.20
+# Co-variate discriminator: |target - best co-variate| Spearman gap needed before
+# we state a lean either way; inside this band the two are too close to separate globally.
+COVAR_MARGIN = 0.15
+
 
 # ---------------------------------------------------------------------------
 # Continuous
@@ -72,7 +82,8 @@ def flagged_bytes(trace_path: str) -> dict:
 
 
 def correlate_continuous(df, sidecar, ids, max_width, top, flagged=None, exclude=None,
-                         ref_window=None, ref_guard=0.0, max_lag=LAG_WINDOW_S):
+                         ref_window=None, ref_guard=0.0, max_lag=LAG_WINDOW_S,
+                         covariates=None):
     groups = common.group_by_id(df)
     if ids:
         groups = {k: v for k, v in groups.items() if k in ids}
@@ -118,6 +129,10 @@ def correlate_continuous(df, sidecar, ids, max_width, top, flagged=None, exclude
     lags = np.linspace(-max_lag, max_lag, LAG_STEPS)
 
     flagged = flagged or {}
+    # Co-variate samplers: the SAME continuous-reference machinery, one per
+    # supplied co-variate channel, used below to score how well each candidate field also
+    # tracks the co-variates (RPM/MAP/pedal) - the deterministic proxy discriminator.
+    cov_samplers = [(name, common.make_reference_sampler(sc)) for name, sc in (covariates or [])]
     skipped = 0
     results = []
     for can_id, g in groups.items():
@@ -147,15 +162,24 @@ def correlate_continuous(df, sidecar, ids, max_width, top, flagged=None, exclude
                 if score > best:
                     best, best_lag = score, lag
 
-            # signedness: re-score signed interpretation, keep better
+            # signedness: re-score signed interpretation, keep better. If signed wins,
+            # re-run the lag search on the signed read so best/best_lag (hence score,
+            # proxy_suspect and the co-variate margin below) all describe the read we
+            # actually keep. Otherwise a signed field's score stays the UNSIGNED value,
+            # which collapses across a two's-complement zero-crossing (torque on overrun)
+            # and would bias the margin against the target.
             signed = False
             raw_s = common.apply_sign(raw, width * 8, True)
             raw_s_fit, _ = common.auto_mask_outliers(raw_s, width * 8, t=g.t)
             if not np.array_equal(raw_s, raw) and np.ptp(raw_s) > 0:
                 sig_s = common.sample_hold(g.t, raw_s_fit, grid)
-                ref_grid = sampler(grid, best_lag)
-                if _windowed_spearman(ref_grid, sig_s, N_WINDOWS) > best:
+                if _windowed_spearman(sampler(grid, best_lag), sig_s, N_WINDOWS) > best:
                     signed = True
+                    best, best_lag = 0.0, 0.0
+                    for lag in lags:
+                        score = _windowed_spearman(sampler(grid, lag), sig_s, N_WINDOWS)
+                        if score > best:
+                            best, best_lag = score, lag
 
             # reference-free plausibility + correlation sign + linear-fit R^2 for the
             # chosen read. R^2 is scale-AWARE (Spearman is monotonic/scale-free), so it
@@ -169,13 +193,33 @@ def correlate_continuous(df, sidecar, ids, max_width, top, flagged=None, exclude
             plaus = plausibility(chosen[np.isfinite(chosen)], width * 8)["score"]
             r2 = common.linear_fit_r2(chosen_grid, ref_best)[2]
             coverage = float(np.mean(np.isfinite(sampler(grid, 0.0))))
-            results.append({
+            # high Spearman + low R^2 = monotonic but not linear, a hint the field may be a
+            # co-varying proxy (see the divergence check) - a flag, not a conclusion.
+            proxy_suspect = bool(best >= PROXY_SPEARMAN and (best - r2) >= PROXY_GAP)
+            rec = {
                 "id": can_id, "id_hex": f"{can_id:X}", "byte": byte,
                 "width": width, "order": order, "signed": signed,
                 "score": round(best, 4), "r2": round(r2, 4), "plaus": plaus,
                 "corr_sign": corr_sign, "lag_s": round(best_lag, 3),
-                "coverage": round(coverage, 2), "n": g.n,
-            })
+                "coverage": round(coverage, 2), "proxy_suspect": proxy_suspect,
+                "n": g.n,
+            }
+            # Co-variate discriminator: how well this same field tracks each co-variate (each at its OWN best
+            # lag - fair to the co-variate, so the margin never over-claims the target).
+            # margin = target Spearman - best co-variate Spearman: strongly + => follows the
+            # TARGET; - => follows a co-variate (proxy). Extra cost is one lag-search per
+            # co-variate per candidate; correlate stays interactive.
+            if cov_samplers:
+                cov_best, cov_name = 0.0, None
+                for cname, csampler in cov_samplers:
+                    cb = max(_windowed_spearman(csampler(grid, lag), chosen_grid, N_WINDOWS)
+                             for lag in lags)
+                    if cb > cov_best:
+                        cov_best, cov_name = cb, cname
+                rec["cov_best"] = round(cov_best, 3)
+                rec["cov_name"] = cov_name
+                rec["margin"] = round(best - cov_best, 3)
+            results.append(rec)
     if skipped:
         print(f"(skipped {skipped} candidate field(s) overlapping counter bytes)",
               file=sys.stderr)
@@ -251,6 +295,13 @@ def main() -> int:
     ap.add_argument("--exclude-ids", help="drop these IDs before searching, e.g. the "
                     "reference source IDs from decode_reference.py (0x7E8) so the search "
                     "can't self-match")
+    ap.add_argument("--covariate", action="append", metavar="NAME=SIDECAR",
+                    help="continuous: bind a co-variate reference (repeatable) to score "
+                         "every candidate against as well, e.g. --covariate rpm=sidecar_rpm.csv "
+                         "--covariate map=sidecar_map.csv. Adds a 'margin' column (target "
+                         "Spearman - best co-variate Spearman): the deterministic proxy test. "
+                         "Strongly positive = the field follows the TARGET; negative = it "
+                         "follows a co-variate. Pair with filter_regime.py for the regime split.")
     ap.add_argument("--max-width", type=int, default=2, help="continuous: max bytes")
     ap.add_argument("--max-lag", type=float, default=LAG_WINDOW_S,
                     help=f"continuous: +/- lag search half-window (s) to absorb "
@@ -279,13 +330,28 @@ def main() -> int:
     exclude = {int(x, 0) for x in args.exclude_ids.split(",")} if args.exclude_ids else None
     flagged = {} if args.no_skip_flagged else flagged_bytes(args.trace)
 
+    covariates = None
+    if args.covariate:
+        covariates = []
+        for spec in args.covariate:
+            if "=" not in spec:
+                print(f"--covariate must be NAME=SIDECAR (got {spec!r})", file=sys.stderr)
+                return 1
+            nm, pth = spec.split("=", 1)
+            covariates.append((nm.strip(), common.load_sidecar(pth)))
+        if args.type == "discrete":
+            print("(--covariate is ignored for --type discrete)", file=sys.stderr)
+            covariates = None
+
     if args.type == "continuous":
         results = correlate_continuous(df, sidecar, ids, args.max_width, args.top,
                                        flagged, exclude,
                                        ref_window=args.ref_window, ref_guard=args.ref_guard,
-                                       max_lag=args.max_lag)
+                                       max_lag=args.max_lag, covariates=covariates)
         cols = ("id_hex", "byte", "width", "order", "signed", "score", "r2", "plaus",
                 "lag_s", "coverage")
+        if covariates:
+            cols += ("cov_name", "margin")
     else:
         results = correlate_discrete(df, sidecar, ids, args.window, args.top,
                                      flagged, exclude)
@@ -338,6 +404,28 @@ def main() -> int:
               f"lag {b['lag_s']}s)\nNext: build_dbc.py --id 0x{b['id_hex']} "
               f"--byte {b['byte']} --width {b['width']} --order {b['order']} "
               f"--lag {b['lag_s']}" + (" --signed" if b['signed'] else ""))
+
+        # Co-variate discriminator lean for the winner.
+        if covariates and b.get("margin") is not None:
+            m, cn = b["margin"], b.get("cov_name")
+            if m >= COVAR_MARGIN:
+                lean = (f"leans TARGET - fits the target better than its closest co-variate "
+                        f"{cn} by {m:+.2f} Spearman")
+            elif m <= -COVAR_MARGIN:
+                lean = (f"leans CO-VARIATE {cn} - this field tracks {cn} MORE than the target "
+                        f"({m:+.2f}); a strong proxy signal, not evidence the target is here")
+            else:
+                lean = (f"TOO CLOSE to call globally ({m:+.2f} vs {cn}) - split them with "
+                        f"filter_regime.py and re-run inside the divergence regime")
+            print(f"Divergence check: {lean}.")
+        # Proxy-suspect hint (soft): high Spearman + low R^2 among the shown candidates.
+        proxies = [r for r in top if r.get("proxy_suspect")]
+        if proxies:
+            tags = ", ".join(f"0x{r['id_hex']}:byte{r['byte']}" for r in proxies)
+            print(f"[~] proxy-suspect (high Spearman, low R^2) AFTER ruling out lag / "
+                  f"endianness+sign / saturation / reference-semantics: {tags}. Possibly a "
+                  f"monotonic proxy - separate it with the divergence regime "
+                  f"(filter_regime.py --where …), not a tighter fit.")
     return 0
 
 

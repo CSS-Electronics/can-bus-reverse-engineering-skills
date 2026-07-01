@@ -109,6 +109,28 @@ R²≈1**. Always validate the fitted line against the *moving* data
 (`calibrate.py --validate-trace/--validate-sidecar`): if the holds fit but the
 motion deviates, the field geometry is wrong, not the calibration.
 
+## Separating collinear signals — split by the divergence regime
+
+Engine-demand channels (throttle / pedal / MAF / load / MAP / torque) rise together,
+and warming temperatures climb together, so each one correlates with the *others'*
+bytes and `correlate` will happily rank a proxy first. A moderate score (R²≈0.5–0.95)
+landing on a byte already assigned to a physically related signal is the warning. Two
+discriminators cut through it. First, the field's own **absolute value** at a
+distinctive operating point (the warm-end temperature, 0 at rest, atmospheric at WOT) —
+the true field must read *that* value, a neighbour's will not. Second, and sharper when
+the log also carries continuous references for the co-variates, the **divergence
+regime**: restrict the correlation to the operating window where the target and its
+co-variates physically pull apart. Engine overrun (foot off, revs up)
+drives torque negative while airflow stays low-positive, so a real torque field tracks
+torque down there while a load proxy keeps following air. Choose a log that actually
+*exercises* that divergence — a cruise-only capture never separates the cluster. A high
+Spearman with a poor R² (rank-monotonic but not linear) points to a proxy rather than the
+value — but only *after* the fixable culprits (unsolved lag, wrong endianness/signedness,
+saturation/sentinel clipping, a reference-semantics mismatch like %-of-reference vs
+absolute) are ruled out, since each produces the same pattern. Then confirm by the regime
+split — the concrete build→mask→filter→re-correlate recipe lives in SKILL.md's
+Divergence-regime proxy test section — not by chasing a tighter global fit.
+
 ## A decoded log reference beats the human ramp
 
 When the user already recorded a log that *also* carries a decodable reference
