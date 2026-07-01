@@ -42,6 +42,19 @@ after the rate is known. Human timing/value input is logged to a separate
 *sidecar* file and aligned to the trace by epoch timestamp (the CANsub sets its
 clock to host time on connect, so trace and sidecar share a reference).
 
+## Reporting discipline — report the evidence, recommend the call
+
+State the evidence and your recommendation; leave the final call to the reviewer. Two
+habits keep the reports honest:
+
+- **Don't turn a finite search into a flat negative.** "No broadcast field found across
+  what I tested" is fair; "not broadcast" isn't — the search only covered the regimes,
+  drives, widths and encodings you actually tried. Say which those were and what's still
+  untried, so the reviewer knows where to look next rather than assuming the door is shut.
+- **A strong match is a recommendation, not a certainty** — "r=0.997 across two drives,
+  recommend accepting" reads better than "confirmed". `verify.py` uses `UNCONFIRMED` the
+  same way: *not yet confirmed*, not *disproven*.
+
 ## Scope (v1)
 
 - Targets **plain, non-multiplexed CAN signals** (the signal being decoded). No
@@ -698,6 +711,42 @@ The decoded sidecar is a normal `kind=value` reference, so the whole downstream
 pipeline is unchanged. `calibrate.py` is rarely needed here — the decoded
 reference is already in physical units.
 
+## Divergence-regime proxy test — separate a target from its co-variates
+
+Use this when a candidate field globally tracks the target but may actually be a
+physically related proxy (torque riding on airflow/MAP, throttle riding on pedal, one
+temperature riding on another). The test works with any continuous sidecars for the
+target and its co-variates, whether they came from an on-bus decoded reference, a video
+reference, or another synchronized source. It asks a narrower question: inside the
+operating window where the target and co-variates physically pull apart, does the field
+follow the target or the co-variate?
+
+1. **Build sidecars for the target and co-variates** on the same time base. Examples:
+   torque as the target; RPM, MAP/load, and pedal as co-variates.
+2. **Define a physical mask from the co-variate channels.** Canonical engine overrun is
+   `pedal < 2 and rpm > 1800`: foot off, engine driven, torque goes negative while
+   airflow/MAP sit low-positive.
+3. **Filter the raw trace and target sidecar to that mask** with `filter_regime.py`.
+   It interpolates the co-variate sidecars, evaluates the boolean `--where`, and writes
+   filtered files plus a retained-percent and inside-vs-outside range report:
+   `python scripts/filter_regime.py --trace temp-output/trace_<app>.csv \
+       --sidecar temp-output/sidecar_<target>.csv --ref rpm=temp-output/sidecar_rpm.csv \
+       --ref pedal=temp-output/sidecar_pedal.csv --where "rpm > 1800 and pedal < 2"`
+4. **Re-run `correlate` on the filtered files** and pass the co-variates with
+   `--covariate`, for example:
+   `python scripts/correlate.py --trace <filtered-trace>.csv \
+       --sidecar <filtered-target-sidecar>.csv --type continuous \
+       --covariate rpm=temp-output/sidecar_rpm.csv \
+       --covariate map=temp-output/sidecar_map.csv`
+   The output adds a `margin` column (target Spearman minus best co-variate Spearman)
+   and prints a graded lean. Strongly positive means the field follows the **target**;
+   negative means it follows a **co-variate**; near zero means the split is still
+   inseparable and the regime needs tightening or a better capture.
+5. **Report the lean, not a flat negative.** In a 2006 Mustang torque check, the
+   `0x200` field that looked torque-like globally scored as a strong MAP proxy inside
+   overrun. That is evidence for the tested regime, not proof that no broadcast torque
+   field exists anywhere.
+
 ## Vision workflow — digitize a reference from a video of a display
 
 Use this when the user has **no decodable on-bus reference** (rules out the Offline
@@ -846,6 +895,51 @@ is unchanged.
   motivated the sweep workflow: the true field was `correlate`'s #1, overridden by an
   "`8×0x80` = 8 gauges" story that was really eight zeroed pulse counters — and it was
   the **baseline-vs-sweep delta**, not the calm scan, that actually disambiguated.
+- **Co-varying signals defeat correlation — disambiguate by ABSOLUTE VALUE, not r².**
+  When several targets move together (everything that rises with engine demand —
+  throttle/pedal/MAF/load/MAP; or all the engine temperatures warming together at
+  once), each correlates ~perfectly with the others' fields, so `correlate`/Spearman
+  rank a *proxy* at the top. The tell: a moderate r² (≈0.5–0.95) landing on a byte
+  already assigned to a physically-related signal. The discriminator is the channel's
+  **own absolute value at a distinctive operating point** — the true field must read
+  *that* value there (the warm-end temperature, 0 at rest, atmospheric at WOT), not a
+  neighbour's. This, not a cleverer excitation, is what separates a collinear cluster.
+- **Collinear cluster, second tool: split by the regime where the signals DIVERGE.**
+  Absolute value (above) needs you to name the true value at an operating point; the
+  continuous-reference workflows hand you a sharper one — a continuous reference for
+  the *co-variates* too (RPM, MAP, load, pedal, all in the same reference set). Find the regime
+  where the target and its co-variates physically pull apart and correlate **only there**.
+  Engine **overrun** (foot off, RPM > ~1800) is the canonical split: torque goes *negative*
+  while airflow/MAP stay low-positive, so a genuine torque field must follow torque down and
+  a load proxy cannot. Worked example: HP Tuners torque *seemed* to land on `0x200` (global
+  R² ≈ 0.7–0.9, Spearman 0.94), but **within overrun** that field tracked MAP at **+0.80**
+  and the torque request at **−0.05** — proving co-variation where no global score could.
+  Pick a log/segment that actually *exercises* the divergence (decel/overrun here); a
+  cruise-only log cannot separate the cluster. The step-by-step recipe (build co-variate
+  sidecars → mask → filter the trace + target sidecar → re-`correlate` → compare within the
+  mask) is in the **Divergence-regime proxy test** section above.
+- **High Spearman + low R² is a strong PROXY tell — but only after the fixable causes are
+  ruled out.** The same pattern (rank-tracks at Spearman ≈ 0.9+, fits loosely at R² ≈ 0.7)
+  also comes from an unsolved **lag**, wrong **endianness / signedness**, **saturation /
+  sentinel** clipping, or a **reference-semantics mismatch** (a %-of-reference vs an absolute
+  value, or a unit / scale offset) — all fixable, and all meaning the geometry or setup is
+  wrong, *not* that the field is a proxy. Check those first. Once they're excluded and it
+  persists, high-Spearman/low-R² means the field is tied to the target through a curved,
+  monotone relationship — a *different* physical quantity that rises with it, not its own
+  field. Corroborating tells: the linear fit implies a span much wider than the target's real
+  range (`0x200`'s field swung ~2× torque's), and the top field flips between the target's
+  siblings run-to-run. Resolve it with the divergence-regime recipe above, not a tighter
+  global fit.
+- **Cross-capture validation is the strongest confirmation.** A field that re-decodes a
+  *separate* capture of the same vehicle (a different drive) at Spearman ≈ 0.99 is real,
+  not overfit. When you have two recordings, identify/calibrate on one and **verify the
+  finished DBC against the other** — far stronger than any single-run score.
+- **Big-endian (Motorola) fields: trust `correlate`'s byte/width geometry, not
+  `bitsearch`'s slice.** `bitsearch`'s start-bit search is Intel/LSB-first, so a
+  big-endian multi-byte field gets **under-read as a narrow slice of its high byte**
+  (e.g. a 16-bit RPM field reported as a 6-bit field). When `correlate` ranks an
+  `--order big` byte/width candidate at the top with high R², build from THAT
+  (`build_dbc --byte … --width … --order big`), not bitsearch's narrow winner.
 - **Show the analysis plots; use them to widen the search.** survey / correlate /
   bitsearch / build_dbc each auto-emit a polished PNG into the signal's
   `analysis-plots/` (pass `--plots-dir …/analysis-plots/`; `--no-plots` to skip).
