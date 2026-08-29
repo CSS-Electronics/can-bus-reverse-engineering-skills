@@ -1,105 +1,85 @@
-# CAN bus reverse engineering skills
+# Driver Classification Platform
 
-This repo contains [Claude Code](https://www.claude.com/claude-code) skills that help you reverse engineer raw CAN bus data into decoding rules stored as DBC files. 
+An offline platform for logging vehicle OBD-II data into labeled, per-driver
+sessions, and preparing that data for a machine-learning model that classifies
+**who is driving** from driving patterns.
 
-Specifically, the skills help you leverage AI/LLM tools like Claude Code and [python-can](https://www.csselectronics.com/pages/python-can-usb-serial-api-stream) scripts to identify which CAN ID and data bits encode a
-real-world value (speed, RPM, state of charge, ...), work out its start bit,
-length, endianness, scale and offset, and verify the result. 
+Everything runs locally on a single device — no cloud, no remote server. Data is
+stored as plain files on disk.
 
-The skills assume that you are using a [CANsub](https://www.csselectronics.com/products/can-fd-usb-interface-ethernet-cansub-2) CAN bus interface from [CSS Electronics](https://www.csselectronics.com) to either record CSV log files via e.g. the [webCAN](https://www.csselectronics.com/pages/webcan-can-bus-streaming-software-browser) tool, or stream data in real-time via USB/Ethernet.
+## What it does
 
-The repo bundles three skills (auto-discovered when you open the folder in Claude
-Code):
+1. **Profiles** — create a profile for each driver.
+2. **Sessions** — log OBD-II data from a drive into a session, tagged with the
+   driver. This tagging is what produces labeled data for training.
+3. **Storage** — parse raw OBD-II logs, preserve them immutably, and derive clean,
+   evenly-sampled tables suitable for analysis and modeling.
+4. **Export** — pull selected drivers, signals, and sessions into a training-ready
+   format for the ML model.
 
-- **cansub-reverse-engineering** - the workflow
-- **combine-dbc** - merge per-signal DBCs into one
-- **cansub-knowledge** - CANsub specs / API reference
+The machine-learning goal is to identify the driver from a window of driving
+behavior, and to flag drives that don't confidently match any known driver.
 
-<br>
+## How the data works
 
-**Note:** This is not a 'polished tool', but an illustration of how you can use the CANsub + Python + AI for CAN sniffing
+The platform ingests **OBD-II logs** (e.g. Car Scanner CSV exports) in a "long"
+format — one row per reading, with many parameters (PIDs) interleaved at different
+sample rates.
 
-**Note:** We strongly recommend reading our related article [CAN bus reverse engineering with AI](https://www.csselectronics.com/pages/can-bus-reverse-engineering-ai-llm-claude).
+The core signals used for driver classification are:
 
-[![Watch the CAN bus reverse engineering demo](docs/vision-reference-demo.png)](https://cdn.shopify.com/videos/c/o/v/e384c5a75b7943e681dcbad2d10e230a.mp4)
+- **Vehicle speed**
+- **Engine RPM**
+- **Vehicle acceleration**
+- **Throttle / pedal position** (driver-intent signal)
 
+Because each signal is sampled at its own rate and its own timestamps, the raw log
+is resampled onto a uniform **10 Hz time grid** (one row per 0.1 s, one column per
+signal). Stretches with no real underlying samples are flagged so that interpolated
+(fabricated) regions can be excluded from analysis and training.
 
-## Recommended hardware
+All parameters from the source log are kept in immutable raw storage; the core
+signal set used downstream is a reversible parameter, not a permanent filter.
 
-- A [CANsub.2](https://www.csselectronics.com/products/can-fd-usb-interface-ethernet-cansub-2) CAN FD interface with USB/Ethernet
-- An [OBD2-DB9 adapter cable](https://www.csselectronics.com/products/obd2-db9-adapter-cable) (and optionally a [contactless adapter](https://www.csselectronics.com/products/contactless-can-bus-reader-adapter))
+## Storage layout
 
-<img src="https://www.csselectronics.com/cdn/shop/files/CANsub-can-bus-interface-stream-real-time-webcan.png" alt="CANsub CAN bus interface streaming real-time in webCAN" width="25%"> <img src="https://www.csselectronics.com/cdn/shop/products/OBD2-DB9-Adapter-Cable-CAN-Bus.jpg?v=1625644186" alt="OBD2-DB9 adapter cable" width="20%">
+Two layers, linked by `session_id`:
 
-## 1. Get the code and install dependencies
-
-1. **Clone the repo** (or download the ZIP from GitHub and extract it)
-2. **Install Python** - [Python 3.10+](https://www.python.org/downloads/); on Windows, tick **"Add python.exe to PATH"**. Verify: `python --version`
-3. **Install the dependencies** into a local virtual environment (`.venv`) so your system Python stays untouched:
-   - **Windows:** double-click **`install.bat`** (or run `install.bat` in a terminal)
-   - **macOS / Linux:** `python3 -m venv .venv && .venv/bin/pip install -r requirements.txt`
-
-## 2. Set up Claude Code
-
-The below is our recommended setup for new Claude Code users:
-
-1. **Get a [Claude subscription](https://claude.ai)** - Claude Code is included with [Claude Pro / Max](https://www.claude.com/claude-code) (or API billing)
-2. **Install [Visual Studio Code](https://code.visualstudio.com)**
-3. **Install the Claude Code extension** - Extensions panel (`Ctrl+Shift+X`), search **"Claude Code"**, install, sign in
-4. **Open this folder** - *File → Open Folder…* → the cloned repo; skills in `.claude/skills/` load automatically
-
-## 3. Connect the hardware
-
-Plug the CANsub into your computer (USB) and into the vehicle's OBD2 port using the
-OBD2-DB9 adapter cable. Start the engine (or set the ignition on) so there's live
-CAN traffic to capture. We recommend verifying via [webCAN](https://www.csselectronics.com/pages/webcan-can-bus-streaming-software-browser) that you can stream raw proprietary CAN bus data before proceeding. If not, consider our [contactless CAN reader](https://www.csselectronics.com/products/contactless-can-bus-reader-adapter). 
-
-## Try it
-
-Open the Claude Code panel in VS Code and ask, for example:
-
-> I've connected my CANsub to my car via the OBD2-DB9 cable. Help me check if there is live proprietary CAN data available - and then help me reverse engineer my door locks
-
-> Reverse engineer Speed and RPM from the proprietary CAN data found in Mercedes-E350-2010-obd2-can.csv (contains OBD2 reference data).
-
-> I have a CANedge log with proprietary vehicle CAN data plus the CANedge's internal GPS/IMU on CAN9 (or a CANmod.gps GPS-to-CAN module). Use the GPS speed as the reference to reverse engineer the proprietary vehicle speed
-
-> Help me reverse engineer Speed from my Opel Astra. I have put the raw CAN data in opel/ along with a video of the speed from my car's dashboard.
-
-> I have a gauge-to-CAN module with 8 gauges connected to my CANsub - help me reverse engineer the 1st gauge position signal.
-
-
-**Note:** You can use our [CANsub CAN+OBD2 sample data](https://www.csselectronics.com/pages/ai-can-bus-sniffer-data-pack) to test the skill
-
-**Note:** You should NOT attach a CSV as an attachment to Claude - it'll attempt to load possibly millions of raw CAN frames into the context window. Instead reference the CSV file path
-
-
-## Output structure and combining DBCs
-
-Each confirmed signal is saved under `decoding-output/`, grouped by application
-(the system under test) and signal:
+- **Metadata** — `SQLite` (a single `.db` file): `drivers` and `sessions` tables,
+  including per-session data-quality stats. The driver on each session is the ML
+  label; `session_id` is the join key across all storage.
+- **Bulk data** — `Parquet` files per session: an immutable raw table (all PIDs) and
+  a derived wide table (10 Hz core signals).
 
 ```
-decoding-output/
-  <application>/                         e.g. mercedes-e350/
-    <signal>/<signal>.dbc                e.g. engine-rpm/engine-rpm.dbc   (one DBC per signal)
-    <signal>/<signal>.png                the verify plot (decoded vs reference)
-    <signal>/analysis-plots/             survey / correlate / bit-search / fit plots
-    <application>.dbc                     the combined DBC across all signals
+project/
+  platform.db                 # SQLite: drivers + sessions metadata
+  sessions/
+    session_101/
+      raw.parquet             # all PIDs, immutable source of truth
+      wide.parquet            # 10 Hz core signals
+    ...
 ```
 
-If you've decoded several signals, ask Claude to merge them into one
-application DBC (using the **combine-dbc** skill):
+## Tech stack
 
-> Combine the decoded DBCs for mercedes-e350 into a single DBC.
+- **Language:** Python
+- **Parsing / data handling:** pandas, numpy
+- **Metadata storage:** SQLite (Python built-in `sqlite3`, serverless, single file)
+- **Bulk time-series storage:** Parquet
+- **Live acquisition (later):** python-OBD (ELM327 / STN adapters, standard PIDs)
+- **Optional local API:** FastAPI
+- **UI (later):** local web app or PySide desktop
+- **Offline packaging (later):** pinned virtual environment or Docker
 
-This produces `decoding-output/<application>/<application>.dbc`. You can load
-this combined DBC in [webCAN](https://www.csselectronics.com/pages/webcan-can-bus-streaming-software-browser)
-and stream live from your CANsub to see your reverse-engineered signals decoded in
-real time - a final, live confirmation of the results.
+## Design principles
 
-## License and attribution
-
-These skills are fully open source under the [MIT License](LICENSE) - you are free to use, modify and distribute them in your own projects.
-
-If you use them in your projects, videos or blog posts, we'd appreciate a reference to our article: [CAN bus reverse engineering with AI](https://www.csselectronics.com/pages/can-bus-reverse-engineering-ai-llm-claude).
+- **Offline-first** — all data stays on the local device, stored as files on disk.
+- **Labeled by construction** — driver → session → readings, so every reading
+  inherits its driver label.
+- **Raw is immutable** — source logs are preserved untouched; everything else is
+  derived from them.
+- **Gaps are flagged, never hidden** — interpolated regions are marked so they can
+  be excluded from training.
+- **Acquisition behind one interface** — logs and (later) a live adapter share the
+  same interface, so the source can be swapped without changing anything downstream.
