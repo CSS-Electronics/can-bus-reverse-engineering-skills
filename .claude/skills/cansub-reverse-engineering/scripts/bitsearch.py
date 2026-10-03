@@ -90,10 +90,23 @@ def _rank_key(e: dict) -> tuple:
             int(e["scale_nice"]), e["length"], e["tidy"])
 
 
+def _field_bits(e: dict) -> list:
+    """Absolute DBC bit positions of a candidate field, LSB -> MSB (Intel or Motorola)."""
+    start, length = int(e["start_bit"]), int(e["length"])
+    if e.get("order") == "little":
+        return [start + i for i in range(length)]
+    bits, pos = [], start                   # Motorola: start = MSB, walk down then next byte
+    for _ in range(length):
+        bits.append(pos)
+        pos = pos + 15 if pos % 8 == 0 else pos - 1
+    return list(reversed(bits))
+
+
 def _extra_lsbs_continue_cascade(narrow: dict, wide: dict, rates: np.ndarray,
                                  *, jump: float = 4.0, tiny: float = 1e-6) -> bool:
     """True if the bits `wide` adds BELOW `narrow` on the LSB side are genuine field
-    low bits (a flip-rate cascade), not a separate appended field.
+    low bits (a flip-rate cascade), not a separate appended field. Works for any
+    byte-order combination of the two candidates.
 
     This is the parsimony guard's discriminator. The over-wide-read failure mode the
     parsimony swap demotes is a wide read that appended a SEPARATE co-varying field
@@ -101,16 +114,39 @@ def _extra_lsbs_continue_cascade(narrow: dict, wide: dict, rates: np.ndarray,
     whose extra low bits simply CONTINUE the cascade (each lower bit toggles ~2x more,
     no jump, never constant) is the TRUE field whose dithering LSBs a noisy reference
     made look like noise - so it must NOT be demoted to the narrow slice."""
-    if narrow.get("order") != "little" or wide.get("order") != "little":
+    if narrow.get("order") == "little" and wide.get("order") == "little":
+        e_lsb, k_lsb = narrow["start_bit"], wide["start_bit"]
+        if k_lsb >= e_lsb:                      # wide must extend below narrow on the LSB side
+            return False
+        for b in range(e_lsb - 1, k_lsb - 1, -1):
+            if b + 1 >= len(rates) or rates[b] <= tiny:
+                return False                   # constant padding -> not a cascade continuation
+            if rates[b] > jump * max(rates[b + 1], tiny):
+                return False                   # a flip-rate jump -> a separate field's LSB
+        return True
+    # Any other byte-order combination: compare BIT SETS. The narrow read must sit in the MSB
+    # part of the wide field; extra bits ABOVE it must be constant (unexercised MSBs) and the
+    # extra bits BELOW it must continue the flip-rate cascade (no jump, never constant). This
+    # keeps a big-endian 16-bit field from losing to a narrow slice of its high byte (e.g. a
+    # 0.25 rpm/bit RPM field reported at ~64 rpm/bit).
+    wb = _field_bits(wide)                  # LSB -> MSB
+    nb = set(_field_bits(narrow))
+    if not nb or not nb < set(wb):
         return False
-    e_lsb, k_lsb = narrow["start_bit"], wide["start_bit"]
-    if k_lsb >= e_lsb:                      # wide must extend below narrow on the LSB side
+    idx = [i for i, b in enumerate(wb) if b in nb]
+    lo_i, hi_i = min(idx), max(idx)
+    if any(wb[i] not in nb for i in range(lo_i, hi_i + 1)):
+        return False                        # narrow must be contiguous inside wide
+    if any(wb[i] < len(rates) and rates[wb[i]] > tiny for i in range(hi_i + 1, len(wb))):
+        return False                        # extra MSBs must be constant (just unexercised)
+    below = wb[:lo_i]
+    if not below:
         return False
-    for b in range(e_lsb - 1, k_lsb - 1, -1):
-        if b + 1 >= len(rates) or rates[b] <= tiny:
-            return False                   # constant padding -> not a cascade continuation
-        if rates[b] > jump * max(rates[b + 1], tiny):
-            return False                   # a flip-rate jump -> a separate field's LSB
+    prev = wb[lo_i]
+    for b in reversed(below):               # walk MSB -> LSB through the extra low bits
+        if b >= len(rates) or rates[b] <= tiny or rates[b] > jump * max(rates[prev], tiny):
+            return False
+        prev = b
     return True
 
 
