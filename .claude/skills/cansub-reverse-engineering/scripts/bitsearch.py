@@ -150,8 +150,58 @@ def _extra_lsbs_continue_cascade(narrow: dict, wide: dict, rates: np.ndarray,
     return True
 
 
+def _crosses_cascade_break(e: dict, rates: np.ndarray, n_frames: int, *, drop: float = 0.5,
+                           min_flips: int = 30, tiny: float = 1e-6) -> bool:
+    """True if a candidate spans a CONFIDENT flip-rate break INSIDE itself: walking its
+    bits MSB -> LSB, a well-exercised bit (>= `min_flips` flips) is followed by a bit
+    that toggles far less (fewer than `min_flips` flips and under `drop` x its rate) but
+    is not constant.
+
+    Inside one numeric field the flip rate normally grows toward the LSB, so such a
+    candidate has usually swallowed a separate, slowly toggling neighbour (a status
+    flag, a gear nibble) as fake low bits - e.g. Intel 7|7 (one flag bit of byte 0 plus
+    the low six bits of byte 1) next to a Motorola 15|16 RPM field. Constant bits are
+    ignored: unexercised MSBs and padding are handled by the boundary rule and the
+    cascade guard."""
+    bits = [b for b in reversed(_field_bits(e)) if b < len(rates) and rates[b] > tiny]
+    for hi, lo in zip(bits, bits[1:]):          # MSB -> LSB over the ACTIVE bits
+        if (rates[hi] * n_frames >= min_flips and rates[lo] * n_frames < min_flips
+                and rates[lo] < drop * rates[hi]):
+            return True
+    return False
+
+
+def _drop_swallowed_neighbours(entries: list[dict], rates: np.ndarray, n_frames: int,
+                               overlap_frac: float, r2_eps: float) -> list[dict]:
+    """Remove candidates that swallowed a slow neighbour bit as a fake LSB (see
+    `_crosses_cascade_break`), but ONLY when a break-free candidate overlaps them and
+    fits the reference as well (R^2 and plausibility within `r2_eps`).
+
+    Such a read is not a subset of the true field, so the cascade guard cannot stop it
+    from displacing that field in the parsimony swap. The fit condition spares a
+    flagged candidate that has no equally good break-free rival, e.g. a big-endian
+    field whose lowest bit toggles rarely while the slices of its high byte fit
+    measurably worse. (A little-endian field loses such a bit: the read without it
+    fits as well.)"""
+    flagged = [_crosses_cascade_break(e, rates, n_frames) for e in entries]
+    clean = [e for e, f in zip(entries, flagged) if not f]
+
+    def rivalled(e: dict) -> bool:
+        s0, l0 = _span(e)
+        for u in clean:
+            s1, l1 = _span(u)
+            inter = max(0, min(s0 + l0, s1 + l1) - max(s0, s1))
+            if (inter >= overlap_frac * min(l0, l1) and u["r2"] >= e["r2"] - r2_eps
+                    and u["plaus"] >= e["plaus"] - r2_eps):
+                return True
+        return False
+
+    return [e for e, f in zip(entries, flagged) if not (f and rivalled(e))]
+
+
 def _suppress_overlaps(entries: list[dict], overlap_frac: float = 0.8,
-                       r2_eps: float = 0.002, rates: np.ndarray | None = None) -> list[dict]:
+                       r2_eps: float = 0.002, rates: np.ndarray | None = None,
+                       n_frames: int = 0) -> list[dict]:
     """Greedy non-maximum suppression so the table shows DISTINCT physical fields.
 
     Walk candidates best-first (by `_rank_key`); a candidate that overlaps an
@@ -169,7 +219,12 @@ def _suppress_overlaps(entries: list[dict], overlap_frac: float = 0.8,
     never displaces the true field; a wrapping low slice has lower plausibility and
     is rejected by the plausibility guard. Because the walk visits the widest
     member of a nested family first, successive shorter-but-equal members displace
-    it in place until the knee (true width) remains."""
+    it in place until the knee (true width) remains.
+
+    With `rates` and `n_frames`, reads that swallowed a slow neighbour bit as a fake
+    LSB are removed first (see `_drop_swallowed_neighbours`)."""
+    if rates is not None and n_frames:
+        entries = _drop_swallowed_neighbours(entries, rates, n_frames, overlap_frac, r2_eps)
     kept: list[dict] = []
     for e in sorted(entries, key=_rank_key, reverse=True):
         s0, l0 = _span(e)
@@ -363,7 +418,7 @@ def main() -> int:
         print("No varying candidates found.", file=sys.stderr)
         return 1
 
-    reps = _suppress_overlaps(results, rates=rates)[:args.top]
+    reps = _suppress_overlaps(results, rates=rates, n_frames=g.n)[:args.top]
 
     # Resolution refinement: a field located from sparse steady holds has a reliable
     # MSB but can be under-resolved on the LSB side (a coarse high-bit slice fits the
@@ -539,6 +594,7 @@ def _mk(order, pos, length, r2, plaus, scale_nice=1, spear=0.99, tidy=3) -> dict
         e["start_bit"] = pos
     else:
         e["byte"] = pos
+        e["start_bit"] = pos * 8 + 7
     return e
 
 
@@ -634,6 +690,47 @@ def _selftest() -> int:
     ok &= t7
     print(f"  cascade guard allows over-wide demotion -> keep {got7} (want [5]) -> "
           f"{'OK' if t7 else 'FAIL'}")
+
+    # (8) the cascade guard must also protect a BIG-ENDIAN field: a 16-bit Motorola field
+    #     (bytes 1-2) must NOT be demoted to an Intel slice of its high byte when the low
+    #     byte CONTINUES the flip-rate cascade. Without the rates the slice still wins.
+    rates8 = np.zeros(24)
+    for i, k in enumerate([13, 12, 11, 10, 9, 8, 23, 22, 21, 20, 19, 18, 17, 16]):   # MSB -> LSB
+        rates8[k] = min(0.5, 0.0005 * 2 ** i)
+    wide8 = _mk("big", 1, 16, 0.9945, 1.00)
+    narrow8 = _mk("little", 8, 6, 0.9938, 1.00, scale_nice=0)
+    guard8 = sorted(c["length"] for c in _suppress_overlaps([wide8, narrow8], rates=rates8))
+    noguard8 = sorted(c["length"] for c in _suppress_overlaps([wide8, narrow8]))
+    t8 = guard8 == [16] and noguard8 == [6]
+    ok &= t8
+    print(f"  cascade guard keeps big-endian wide={guard8} (want [16]), no-rates={noguard8} "
+          f"(want [6]) -> {'OK' if t8 else 'FAIL'}")
+
+    # (9) a read that swallowed a slowly toggling neighbour bit as a fake LSB (Intel 7|7:
+    #     a flag bit of byte 0 + the low six bits of byte 1) must NOT displace the
+    #     big-endian field. Without the frame count the filter is off and it still does.
+    rates9 = rates8.copy()
+    rates9[7] = 2 / 10000.0                                 # the flag flips twice in 10000 frames
+    swallow9 = _mk("little", 7, 7, 0.9938, 1.00, scale_nice=0)
+    fam9 = [wide8, narrow8, swallow9]
+    drop9 = sorted(c["length"] for c in _suppress_overlaps(fam9, rates=rates9, n_frames=10000))
+    nodrop9 = sorted(c["length"] for c in _suppress_overlaps(fam9, rates=rates9))
+    t9 = drop9 == [16] and nodrop9 == [7]
+    ok &= t9
+    print(f"  swallowed-neighbour read removed -> keep {drop9} (want [16]), no-frames={nodrop9} "
+          f"(want [7]) -> {'OK' if t9 else 'FAIL'}")
+
+    # (10) ... but a GENUINE field whose lowest bit merely toggles rarely must be kept
+    #      when its break-free alternative (the high-byte slice) fits measurably worse.
+    rates10 = rates8.copy()
+    rates10[16] = 5 / 10000.0                               # the LSB flips 5 times in 10000 frames
+    coarse10 = _mk("little", 8, 6, 0.9864, 1.00, scale_nice=0)
+    keep10 = sorted(c["length"] for c in _suppress_overlaps([wide8, coarse10], rates=rates10,
+                                                            n_frames=10000))
+    t10 = keep10 == [16] and _crosses_cascade_break(wide8, rates10, 10000)
+    ok &= t10
+    print(f"  rarely-toggling LSB of a real field is kept -> keep {keep10} (want [16]) -> "
+          f"{'OK' if t10 else 'FAIL'}")
 
     print("bitsearch selftest:", "PASS" if ok else "FAIL")
     return 0 if ok else 1
