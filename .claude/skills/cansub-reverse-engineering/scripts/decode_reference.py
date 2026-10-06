@@ -12,8 +12,9 @@ usually fits far better than the hand-driven method (it may be coarser/sparser).
 
 REFERENCE-SOURCE AGNOSTIC: we decode strictly what the supplied DBC defines for
 the CAN IDs present in the log. cantools handles multiplexed DBCs (e.g. OBD2)
-transparently; there is no protocol-specific logic here. Frames whose ID isn't in
-the DBC are ignored - supply a DBC that covers the IDs you care about.
+transparently; the only protocol-specific logic is skipping diagnostic request IDs
+(--ids overrides). Frames whose ID isn't in the DBC are ignored - supply a DBC
+that covers the IDs you care about.
 
 webCAN CSV is native to python-can-cansub; CANedge users can produce it from an
 MF4 log via the mdf2csv converter.
@@ -86,7 +87,8 @@ def main() -> int:
     ap.add_argument("--out", help="sidecar CSV (default temp-output/sidecar_<label>.csv)")
     ap.add_argument("--png", help="verification plot (default temp-output/decode_<label>.png)")
     ap.add_argument("--ids", help="restrict to these DBC source IDs (hex csv); "
-                    "default = all DBC message IDs present in the log")
+                    "default = all DBC message IDs present in the log, except "
+                    "diagnostic request IDs (e.g. 0x7DF)")
     args = ap.parse_args()
 
     try:
@@ -103,6 +105,17 @@ def main() -> int:
     trace_ids = {int(i) for i in df["id"].unique()}
     dbc_ids = {m.frame_id for m in db.messages}
     src_ids = sorted(trace_ids & dbc_ids)
+    all_src_ids = list(src_ids)            # still excluded from the raw-bus search below
+    if not args.ids:
+        # Skip diagnostic requests (e.g. a scan tool's 0x7DF polls) - they decode as garbage.
+        req = {m.frame_id for m in db.messages if m.name.upper().endswith("_TX")}
+        req |= {0x7DF} | set(range(0x7E0, 0x7E8)) | {0x18DB33F1}
+        req |= {i for i in src_ids if (i & 0x1FFF00FF) == 0x18DA00F1}
+        dropped = [i for i in src_ids if i in req]
+        if dropped and len(dropped) < len(src_ids):
+            src_ids = [i for i in src_ids if i not in req]
+            print(f"(skipping diagnostic REQUEST ids {[hex(i) for i in dropped]} - decoding responses only; "
+                  f"--ids overrides)", file=sys.stderr)
     if args.ids:
         want = {int(x, 0) for x in args.ids.split(",")}
         src_ids = [i for i in src_ids if i in want]
@@ -201,7 +214,8 @@ def main() -> int:
     distinct = int(len(np.unique(vs)))
     label = args.label or target
     unit = _unit_of(db, src_ids, target)
-    src = ",".join(sorted(hex(i) for i in produced))
+    # exclude the producing ids AND any skipped request ids from the raw-bus search
+    src = ",".join(sorted(hex(i) for i in set(produced) | set(all_src_ids)))
 
     print(f"Decoded '{target}' [{unit}] from {sorted(hex(i) for i in produced)}:")
     print(f"  n={len(vs)}  min={vs.min():.4g}  max={vs.max():.4g}  mean={vs.mean():.4g}  "
