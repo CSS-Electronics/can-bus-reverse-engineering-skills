@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "CANsub REST API.",
-    "version": "02.00",
+    "title": "CANsub REST API",
+    "version": "05.00",
     "description": "CANsub REST API for configuration and monitoring."
   },
   "servers": [
@@ -63,7 +63,7 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "description": "Device ID as a 8-digit hexadecimal value."
+                      "description": "Device ID as an 8-digit hexadecimal value."
                     },
                     "hw_ver": {
                       "type": "string",
@@ -101,16 +101,14 @@
     "/api/time": {
       "get": {
         "summary": "Get device time",
-        "description": "Returns the current device time as an RFC3339/ISO-8601 UTC timestamp string (JSON string).",
+        "description": "Returns the current device time and the clock rate correction currently applied.",
         "responses": {
           "200": {
-            "description": "Current device time.",
+            "description": "Current device time and rate correction.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "string",
-                  "format": "date-time",
-                  "example": "\"2025-01-01T00:00:00.000Z\""
+                  "$ref": "#/components/schemas/time"
                 }
               }
             }
@@ -119,15 +117,13 @@
       },
       "put": {
         "summary": "Set device time",
-        "description": "Sets the device time using an RFC3339/ISO-8601 UTC timestamp string (JSON string).",
+        "description": "Sets the device time and the clock rate correction. Overrides and disables time synchronization for the rest of the power cycle.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "string",
-                "format": "date-time",
-                "example": "\"2025-01-01T00:00:00.000Z\""
+                "$ref": "#/components/schemas/time"
               }
             }
           }
@@ -137,7 +133,124 @@
             "description": "Device time set successfully."
           },
           "400": {
-            "description": "Bad request (invalid/unsupported time format)."
+            "description": "Bad request (invalid object, unsupported time format, or time or rate outside the supported range)."
+          }
+        }
+      }
+    },
+
+    "/api/time/ptp": {
+      "get": {
+        "summary": "Get PTP status",
+        "description": "Returns the status of the PTP (IEEE 1588) time synchronization.",
+        "responses": {
+          "200": {
+            "description": "PTP status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "master": {
+                      "type": "string",
+                      "nullable": true,
+                      "description": "Clock identity of the PTP master being followed, or null when no master has been detected or synchronization is disabled."
+                    },
+                    "state": {
+                      "type": "string",
+                      "enum": ["disabled", "idle", "initializing", "tracking"],
+                      "description": "Synchronization state. Disabled: Permanently disabled. Idle: No synchronization information is being received. Initializing: Preparing for tracking. Tracking: Tracking external time."
+                    },
+                    "offset_ns": {
+                      "type": "integer",
+                      "description": "Clock error at the latest measurement, in nanoseconds (positive when the device clock is ahead of the master). Zero when not in the tracking state."
+                    }
+                  },
+                  "required": ["master", "state", "offset_ns"],
+                  "example": {
+                    "master": "a1a2a3a4a5a6a7a8",
+                    "state": "tracking",
+                    "offset_ns": -1500
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/api/reboot": {
+      "post": {
+        "summary": "Reboot device",
+        "description": "Reboots the device. All active WebSocket connections are closed.",
+        "responses": {
+          "202": {
+            "description": "Reboot initiated."
+          }
+        }
+      }
+    },
+
+    "/api/client-cert": {
+      "get": {
+        "summary": "Get client certificate identifier",
+        "description": "Returns the SHA-256 fingerprint of the DER-encoded client certificate currently loaded as the trust anchor for TLS mutual authentication.",
+        "responses": {
+          "200": {
+            "description": "SHA-256 fingerprint of the loaded client certificate as a 64-digit hexadecimal value.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$",
+                  "minLength": 64,
+                  "maxLength": 64,
+                  "example": "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No client certificate loaded (mutual authentication disabled)."
+          }
+        }
+      },
+      "put": {
+        "summary": "Upload client certificate",
+        "description": "Uploads the client public certificate (PEM format) used as the trust anchor for TLS mutual authentication, replacing any existing certificate.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-pem-file": {
+              "schema": {
+                "type": "string",
+                "example": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Certificate stored. Mutual authentication enabled."
+          },
+          "400": {
+            "description": "Bad request (not a valid X.509 certificate)."
+          },
+          "413": {
+            "description": "Payload too large."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove client certificate",
+        "description": "Removes the stored client certificate, disabling TLS mutual authentication.",
+        "responses": {
+          "200": {
+            "description": "Certificate removed. Mutual authentication disabled."
+          },
+          "404": {
+            "description": "No client certificate loaded."
           }
         }
       }
@@ -194,6 +307,32 @@
           },
           "404": {
             "description": "CAN channel not found."
+          }
+        }
+      }
+    },
+
+    "/api/can/{channel}/ws": {
+      "delete": {
+        "summary": "Abort CAN channel WebSocket connection",
+        "description": "Aborts the channel WebSocket connection. Queued data is discarded (not transmitted on the CAN bus), allowing the connection to close even when the bus cannot transmit the queued data.",
+        "parameters": [
+          {
+            "name": "channel",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "WebSocket connection abort requested."
+          },
+          "404": {
+            "description": "No active WebSocket connection on the channel."
           }
         }
       }
@@ -355,7 +494,7 @@
     "/api/can/{channel}/filter/{filter_id}": {
       "get": {
         "summary": "Get filter",
-        "description": "Get receive filter details by ID.",
+        "description": "Returns receive filter details by ID.",
         "parameters": [
           {
             "name": "channel",
@@ -394,7 +533,7 @@
       },
       "delete": {
         "summary": "Delete filter",
-        "description": "Removes receive filter by ID.",
+        "description": "Removes a receive filter by ID.",
         "parameters": [
           {
             "name": "channel",
@@ -462,8 +601,8 @@
         }
       },
       "post": {
-        "summary": "Create new transmit sequence.",
-        "description": "Creates new transmit sequence.",
+        "summary": "Create new transmit sequence",
+        "description": "Creates a new transmit sequence.",
         "parameters": [
           {
             "name": "channel",
@@ -504,7 +643,7 @@
             "description": "CAN channel not found."
           },
           "503": {
-            "description": "Service unavailable (e.g., no more space for transmit-sequences)."
+            "description": "Service unavailable (e.g., no more space for transmit sequences)."
           }
         }
       }
@@ -513,7 +652,7 @@
     "/api/can/{channel}/transmit/{transmit_id}": {
       "get": {
         "summary": "Get transmit sequence by ID",
-        "description": "Gets a transmit sequence by ID.",
+        "description": "Returns a transmit sequence by ID.",
         "parameters": [
           {
             "name": "channel",
@@ -617,7 +756,7 @@
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 4294967295,
-                  "description": "Valid count range (0xFFFFFFFF is error value).",
+                  "description": "Valid count range (0xFFFFFFFF is the error value).",
                   "example": 10
                 }
               }
@@ -659,7 +798,7 @@
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 4294967294,
-                "description": "Valid count range  (0xFFFFFFFF error value excluded).",
+                "description": "Valid count range (the 0xFFFFFFFF error value is excluded).",
                 "example": 10
               }
             }
@@ -682,6 +821,28 @@
 
   "components": {
     "schemas": {
+      "time": {
+        "type": "object",
+        "properties": {
+          "utc": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Device time as an RFC3339/ISO-8601 UTC timestamp string, format YYYY-MM-DDTHH:MM:SS.sssZ. Must be 2025-01-01T00:00:00.000Z or later."
+          },
+          "rate_ppb": {
+            "type": "integer",
+            "minimum": -200000,
+            "maximum": 200000,
+            "description": "Clock rate correction applied to the device time, in parts per billion. Positive when the device clock is being sped up, i.e. it would otherwise run slow. Use 0 when no correction is known."
+          }
+        },
+        "required": ["utc", "rate_ppb"],
+        "example": {
+          "utc": "2025-01-01T00:00:00.000Z",
+          "rate_ppb": 0
+        }
+      },
+
       "status": {
         "type": "object",
         "properties": {
@@ -775,7 +936,11 @@
           },
           "error_frames": {
             "type": "boolean",
-            "description": "Enables monitoring of error-frames (bus error, stuffing error, etc.)."
+            "description": "Enables monitoring of error frames (bus error, stuffing error, etc.)."
+          },
+          "tx_ack_frames": {
+            "type": "boolean",
+            "description": "Enables transmission acknowledgements. When enabled, an acknowledgement is sent to the client via the WebSocket for each successfully transmitted frame. Disabling reduces network data usage."
           },
           "timing": {
             "description": "Nominal bit timing.",
@@ -794,19 +959,42 @@
             ]
           }
         },
-        "required": ["listen_only", "auto_reset", "error_frames" ,"timing", "timing_data"]
+        "required": ["listen_only", "auto_reset", "error_frames", "tx_ack_frames", "timing", "timing_data"],
+        "example": {
+          "listen_only": false,
+          "auto_reset": true,
+          "error_frames": false,
+          "tx_ack_frames": true,
+          "timing": {
+            "brp": 4,
+            "seg1": 63,
+            "seg2": 16,
+            "sjw": 4
+          },
+          "timing_data": {
+            "brp": 4,
+            "seg1": 15,
+            "seg2": 4,
+            "sjw": 4
+          }
+        }
       },
 
       "filter": {
         "type": "object",
         "properties": {
+          "label": {
+            "type": "string",
+            "maxLength": 32,
+            "description": "Optional user-defined label."
+          },
           "is_extended": {
             "type": "boolean",
-            "description": "True for Extended ID (29-bit), False for Standard ID (11-bit)."
+            "description": "True for an extended (29-bit) ID, false for a standard (11-bit) ID."
           },
           "is_range": {
             "type": "boolean",
-            "description": "True if filter is a range filter, False if filter is a mask filter."
+            "description": "True if the filter is a range filter, false if it is a mask filter."
           },
           "f1": {
             "type": "integer",
@@ -821,19 +1009,31 @@
             "description": "When is_range=false: filter mask. When is_range=true: range end."
           }
         },
-        "required": ["is_extended", "is_range", "f1", "f2"]
+        "required": ["is_extended", "is_range", "f1", "f2"],
+        "example": {
+          "label": "Optional filter label",
+          "is_extended": false,
+          "is_range": false,
+          "f1": 0,
+          "f2": 0
+        }
       },
 
       "frame": {
         "type": "object",
         "properties": {
+          "label": {
+            "type": "string",
+            "maxLength": 32,
+            "description": "Optional user-defined label."
+          },
           "is_extended": {
             "type": "boolean",
-            "description": "Is frame ID extended (29-bit) or standard (11-bit)."
+            "description": "True for an extended (29-bit) ID, false for a standard (11-bit) ID."
           },
           "is_fd": {
             "type": "boolean",
-            "description": "Is frame format FD or classic."
+            "description": "True for a CAN FD frame, false for a classic CAN frame."
           },
           "is_rtr_brs": {
             "type": "boolean",
@@ -847,7 +1047,7 @@
           },
           "data": {
             "type": "string",
-            "description": "Hexadecimal encoded data payload. Empty string for no data bytes. Dummy bytes to set RTR frame length.",
+            "description": "Hexadecimal encoded data payload. Empty string for no data bytes. For RTR frames, dummy bytes set the frame length.",
             "pattern": "^[0-9a-fA-F]*$",
             "maxLength": 128
           }
@@ -858,6 +1058,11 @@
       "transmit_sequence": {
         "type": "object",
         "properties": {
+          "label": {
+            "type": "string",
+            "maxLength": 32,
+            "description": "Optional user-defined label."
+          },
           "limit": {
             "type": "integer",
             "minimum": 1,
@@ -881,7 +1086,23 @@
             }
           }
         },
-        "required": ["limit", "period_ms", "spacing_ms", "frames"]
+        "required": ["limit", "period_ms", "spacing_ms", "frames"],
+        "example": {
+          "label": "Optional transmit label",
+          "limit": 10,
+          "period_ms": 1000,
+          "spacing_ms": 1,
+          "frames": [
+            {
+              "label": "Optional frame label",
+              "is_extended": false,
+              "is_fd": false,
+              "is_rtr_brs": false,
+              "id": 1,
+              "data": "01020304"
+            }
+          ]
+        }
       }
     }
   }

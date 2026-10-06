@@ -1,26 +1,32 @@
 # CANsub Intro
 
-> Get started guide for the CANsub (CANsub.2 / CANsub.4) CAN-FD bus interface family. This documentation covers introduction, device configuration via the browser-based webCAN tool, protocol-specific guidance (OBD2, UDS, J1939, NMEA 2000, CANopen, CCP/XCP), streaming troubleshooting, and software tools (webCAN, Python via python-can-cansub, SavvyCAN, PlotJuggler, and custom REST/WebSocket apps). It is strongly recommended to also download the technical CANsub.2 Docs and CANsub.4 Docs and use these in combination with this introduction material. Those Docs are also available in AI/LLM-friendly text file versions.
+> Get started guide for the CANsub (CANsub.2 / CANsub.4) CAN-FD bus interface family. This documentation covers introduction, device configuration via the browser-based webCAN tool, protocol-specific guidance (OBD2, UDS, J1939, NMEA 2000, CANopen, CCP/XCP), streaming troubleshooting, and software tools (webCAN, Python via python-can-cansub, SocketCAN via a Python-based daemon (Linux), SavvyCAN, PlotJuggler, and custom REST/WebSocket apps). It is strongly recommended to also download the technical CANsub.2 Docs and CANsub.4 Docs and use these in combination with this introduction material. Those Docs are also available in AI/LLM-friendly text file versions.
 
 
 2026, CSS Electronics
 
 ## Pages
 
-- [Configure your device](configure-device\index.html.md): Configure the CANsub via the browser-based webCAN tool: bit-rate (manual or auto-detect), hardware filters, and transmit-list jobs. Configurations can be exported and re-imported for project-based re-use.
+- [Configure your device](configure-device\index.html.md): Configure the CANsub via the browser-based webCAN tool: bit-rate (manual or auto-detect), hardware filters, and transmit-list jobs. Configurations can be saved and loaded for project-based re-use.
+- [Connect](connect\index.html.md): Ways to connect to the CANsub: USB (direct PC connection), LAN (Ethernet network), WiFi (via a WiFi router) and remote access over the internet via VPN (office VPN or LTE router with a cloud VPN server).
 - [Get started](get-started\index.html.md): Get started with the CANsub (CANsub.2 / CANsub.4) via the step-by-step getting-started guides in the Docs.
-- [Contents](index.html.md): Top-level table of contents for the CANsub Intro: device introduction, configuration via webCAN, recording (protocol-specific guidance, streaming troubleshooting), software tools (webCAN, Python, SavvyCAN, PlotJuggler, custom apps).
+- [Contents](index.html.md): Top-level table of contents for the CANsub Intro: device introduction, configuration via webCAN, recording (protocol-specific guidance, streaming troubleshooting), connectivity (USB, LAN, WiFi, remote/VPN), software tools (webCAN, Python, SocketCAN, SavvyCAN, PlotJuggler, custom apps).
 - [CANsub - get started](introduction\index.html.md): Quick-start overview of the CANsub (CANsub.2 / CANsub.4) CAN-FD bus interface family: workflow steps, link to the separate technical CANsub.2 and CANsub.4 Docs, and pointers into each section of the Intro.
-- [Software](software-tools\index.html.md): Software tools for the CANsub: webCAN (browser-based), Python (python-can-cansub), SavvyCAN (free CSS Electronics plugin), PlotJuggler (real-time plotting), and custom REST/WebSocket apps.
+- [Software](software-tools\index.html.md): Software tools for the CANsub: webCAN (browser-based), Python (python-can-cansub), SocketCAN (Linux, via Python-based daemon), SavvyCAN (free CSS Electronics plugin), PlotJuggler (real-time plotting), and custom REST/WebSocket apps.
 - [Stream CAN data](stream-data\index.html.md): How to stream CAN data with the CANsub: preparation, basic channel verification via webCAN, and links to protocol-specific guides and streaming troubleshooting.
 - [Docs for AI](ai\index.html.md): Download link to the single-file plain-text CANsub Intro built for AI assistants (LLMs) - contains the full CANsub Intro content in one .txt file optimised for LLM ingestion.
+- [LAN](connect\lan\index.html.md): Connect the CANsub to an Ethernet network with a DHCP server: the device gets an IP automatically and is reachable via its device URL from any PC on the network. USB provides power.
+- [Remote](connect\remote\index.html.md): Access the CANsub remotely over the internet via a VPN: use an existing office VPN, or deploy a field setup with a WireGuard LTE router and an AWS Lightsail VPN server (CloudFormation template and RUT200 setup script included).
+- [USB](connect\usb\index.html.md): Connect to the CANsub via USB: one cable provides power and data, exposing the device as a network interface at its device URL. The simplest access method for bench use with a single PC.
+- [WiFi](connect\wifi\index.html.md): Access the CANsub over WiFi by connecting its Ethernet port to a WiFi router: phones, tablets and PCs on the WiFi network can then open webCAN via the device URL.
 - [Streaming troubleshooting tips](get-started\streaming-troubleshooting\index.html.md): Troubleshoot CANsub streaming issues: verify device connection (USB/Ethernet/mDNS), check CAN-controller state and error counters, verify bit-timing, apply hardware filters for high-throughput buses, and contact procedure.
 - [About this manual](introduction\about-manual\index.html.md): About the CANsub Intro manual: scope (getting started plus software tools), structure by workflow step, link to the full CANsub.2 / CANsub.4 Docs product manuals, and admonition notation conventions.
 - [AI assistants](software-tools\ai\index.html.md): Build CANsub apps and integrations faster with AI assistants (ChatGPT, Claude Code, ...) by providing the LLM-optimised CANsub reference files as context - the python-can-cansub README, the CANsub Docs text files and the CANsub Intro text file.
-- [Custom apps](software-tools\custom-apps\index.html.md): Build your own apps on top of the CANsub's open REST + WebSocket API. python-can-cansub is the recommended starter abstraction for Python apps; the Qt plugin used by SavvyCAN is the recommended starter for desktop GUI tools.
+- [Custom apps](software-tools\custom-apps\index.html.md): Build your own apps on top of the CANsub's open REST + WebSocket API. python-can-cansub is the recommended starter abstraction for Python apps; the Qt plugin used by SavvyCAN is the recommended starter for desktop GUI tools; on Linux the SocketCAN daemon lets existing SocketCAN apps work unchanged.
 - [PlotJuggler](software-tools\plotjuggler\index.html.md): PlotJuggler is an open-source real-time time-series plotting tool. It can visualise signals streamed from the CANsub via the open REST / WebSocket API for live dashboarding and analysis.
-- [Python](software-tools\python\index.html.md): Use the CANsub from Python via the python-can-cansub package - a python-can integration with mDNS auto-discovery, hardware filters, broadcast manager, CSV logger compatible with webCAN, and the standard python-can CLI tools.
+- [python-can](software-tools\python\index.html.md): Use the CANsub from Python via the python-can-cansub package - a python-can integration with mDNS auto-discovery, hardware filters, broadcast manager, CSV logger compatible with webCAN, and the standard python-can CLI tools.
 - [SavvyCAN](software-tools\savvycan\index.html.md): Stream CANsub CAN data into the open-source SavvyCAN GUI via the free CSS Electronics plugin: connection, DBC loading, CSV export, and reverse-engineering tools (sniffer, range state, flow view, plotting) plus custom-frame transmission and replay.
+- [SocketCAN](software-tools\socketcan\index.html.md): Use the CANsub as a SocketCAN network interface on Linux via a Python-based daemon - enabling standard SocketCAN tools like can-utils (candump, cansend) and any SocketCAN-compatible library. Early access - contact us for the installation guide and files.
 - [webCAN](software-tools\webcan\index.html.md): webCAN is the browser-based GUI served directly by the CANsub - zero install. Covers configure, DBC decode, summary, trace, live charts, filters, transport protocols (ISO-TP / J1939 TP / NMEA Fast Packets), transmit, and CSV export/import.
 - [CANedge](stream-data\canedge\index.html.md): Use the CANedge CAN bus data loggers together with the CANsub: load CANedge mdf2csv CSV output in webCAN, and convert CANedge transmit lists into a CANsub webCAN config or a python-can transmit schedule via canedge_utils.py.
 - [Stream CANopen data](stream-data\canopen-data\index.html.md): Stream CANopen data with the CANsub: connect via M12-DB9/DB9/contactless adapters, broadcast PDO streaming via webCAN, and DBC decoding using a DBC converted from your EDS file.
@@ -28,16 +34,18 @@
 - [Stream NMEA 2000 data](stream-data\nmea-data\index.html.md): Stream NMEA 2000 data with the CANsub: broadcast PGN logging at 250 kbit/s and Fast-Packet reassembly via webCAN's Transport Protocol support, with full DBC decoding.
 - [Stream OBD2 data](stream-data\obd2-data\index.html.md): Stream OBD2 data with the CANsub: configure PID requests via webCAN's transmit-list DBC encoder, reassemble multi-frame responses via ISO-TP support, and use python-can-cansub for scripted setups.
 - [Protocols](stream-data\protocols\index.html.md): Index of protocol-specific streaming guides for the CANsub: OBD2, UDS, J1939, NMEA 2000, CANopen, and CCP/XCP on CAN. Each page covers the webCAN configuration and python-can-cansub equivalents.
-- [Stream UDS data](stream-data\uds-data\index.html.md): Stream UDS data with the CANsub: send Single-Frame requests with Flow-Control frames via webCAN's transmit list, reassemble multi-frame ISO-TP responses, and stream via the CANsub Python API.
+- [Stream UDS data](stream-data\uds-data\index.html.md): Stream UDS data with the CANsub: send Single-Frame requests with Flow-Control frames via webCAN's transmit list, reassemble multi-frame ISO-TP responses, and stream via python-can.
 - [Stream CCP / XCP on CAN data](stream-data\xcp-data\index.html.md): Stream CCP / XCP on CAN data with the CANsub: configure dynamic DAQ list initialisation via custom transmit sequences in webCAN, then decode the DAQ responses via DBC.
 - [Configure](software-tools\python\configure\index.html.md): Configure the CANsub from Python via the open REST API (described by an OpenAPI file) - or, for most use cases, via the python-can integration which abstracts REST configuration behind the python-can interface (e.g. set bit-rate, deploy transmit sequences).
 - [Demos](software-tools\python\demos\index.html.md): Simple demo examples of using the CANsub via python-can - e.g. to build quick mini applications.
 - [Any device](software-tools\webcan\any-device\index.html.md): webCAN is served as a standard web app over HTTPS, so it runs natively on Windows, Linux and macOS across laptops, tablets and smartphones. Connect the CANsub to a WiFi router via Ethernet and open the device URL on any device.
-- [Configure](software-tools\webcan\configuration\index.html.md): Configure the CANsub in webCAN: bit-rate (manual or auto-detect), filters, listen-only and error frames; set transport-protocol rules (ISO-TP / J1939 TP / NMEA 2000 Fast Packets); deploy on-device transmit sequences with optional DBC encoding; and load DBC files to decode raw frames into physical values.
+- [Configure](software-tools\webcan\configuration\index.html.md): Configure the CANsub in webCAN: bit-rate (manual or auto-detect), filters, listen-only and error frames; set transport-protocol rules (ISO-TP / J1939 TP / NMEA 2000 Fast Packets); deploy on-device transmit sequences with optional DBC encoding; understand device time and PTP synchronisation; and load DBC files to decode raw frames into physical values.
 - [Status bar](software-tools\webcan\status-bar\index.html.md): The webCAN status bar shows real-time information polled directly from the CANsub - such as per-channel bus state - independent of the data buffered and computed in the browser.
 - [Summary/Trace/Chart](software-tools\webcan\summary-trace-chart\index.html.md): View CANsub data in webCAN three ways - the summary view (one row per unique frame/signal), the trace view (every frame time-sorted) and live charts (decoded signals over time). Filter across all views and export/import data as CSV.
+- [AI CAN sniffer skill (Claude Code)](software-tools\python\demos\ai-can-sniffer\index.html.md): A Claude Code skill that uses the CANsub python-can integration to reverse engineer proprietary CAN signals with an AI/LLM - showcasing how python-can also enables efficient AI workflows.
 - [CAN-to-MQTT](software-tools\python\demos\can2mqtt\index.html.md): Forward decoded CANsub data to an MQTT broker using python-can and cantools - e.g. for live dashboards in Grafana.
-- [Real-time plot GUI (Flask + uPlot)](software-tools\python\demos\cansub-plot\index.html.md): A small single-file Flask web app that streams live CANsub data, DBC-decodes it and plots signals in real time in the browser - built to showcase how quickly AI assistants can generate custom CANsub apps with the Python API.
+- [Real-time plot GUI (Flask + uPlot)](software-tools\python\demos\cansub-plot\index.html.md): A small single-file Flask web app that streams live CANsub data, DBC-decodes it and plots signals in real time in the browser - built to showcase how quickly AI assistants can generate custom CANsub apps with python-can.
+- [IMU attitude GUI (PySide6/Qt)](software-tools\python\demos\imu-attitude-gui\index.html.md): A small PySide6/Qt desktop app that streams live CANsub IMU data and rotates a 3D model in real time - showcasing how Python + Qt can build custom desktop-style apps on top of the CANsub python-can integration.
 
 ---
 
@@ -47,22 +55,26 @@
 
 # Configure your device
 
-> ##### Table of Contents
-> 
-> * [Configure via webCAN](#configure-via-webcan)
-> * [Configure via Python](#configure-via-python)
+You can configure the CANsub via e.g. [webCAN](software-tools/webcan/configuration.md#ref-webcan-configuration), [python-can](software-tools/python/configure.md#ref-python-configure) or directly via the REST API.
 
----
+# index.html.md
 
-## Configure via webCAN
+<a id="ref-connect"></a>
 
-You can configure the CANsub in your browser via [webCAN](software-tools/webcan.md#ref-software-webcan) - see the [configuration](software-tools/webcan/configuration.md#ref-webcan-configuration) section.
+# Connect
 
----
+The CANsub serves the same HTTPS interface (webCAN and the REST/WebSocket API) regardless of how you connect to it. Select the method that fits your use case:
 
-## Configure via Python
+* [USB](connect/usb.md#ref-connect-usb) - direct connection to a single PC, one cable for power and data
+* [LAN](connect/lan.md#ref-connect-lan) - Ethernet connection to a network, access from any PC on it
+* [WiFi](connect/wifi.md#ref-connect-wifi) - Ethernet connection to a WiFi router, access from phones/tablets/PCs
+* [Remote](connect/remote.md#ref-connect-remote) - access over the internet via a VPN, incl. LTE router setups
 
-You can also configure the CANsub programmatically via [Python](software-tools/python.md#ref-software-python) - see the [configuration](software-tools/python/configure.md#ref-python-configure) section.
+#### NOTE
+See our [CAN + Ethernet intro](https://www.csselectronics.com/pages/can-bus-ethernet-interface-wifi-lte) for practical showcases on this topic
+
+#### WARNING
+For Ethernet connections (LAN, WiFi, remote), we recommend enabling mTLS to restrict device access to authenticated clients - see the [CANsub Docs](https://www.csselectronics.com/pages/can-bus-hardware-software-docs#cansub-resources)
 
 # index.html.md
 
@@ -85,6 +97,7 @@ If you encounter any issues, see the [troubleshooting](get-started/streaming-tro
 * [Get started](get-started.md)
 * [Configure](configure-device.md)
 * [Stream](stream-data.md)
+* [Connect](connect.md)
 * [Software](software-tools.md)
 * [Docs for AI](ai/index.md)
 
@@ -98,7 +111,7 @@ This guide provides a quick overview of the CANsub and related software tools.
 
 ### Quick links
 
-[Get started](get-started.md#ref-get-started) | [webCAN](software-tools/webcan.md#ref-software-webcan) | [Python](software-tools/python.md#ref-software-python) | [Protocols (J1939, OBD2, …)](stream-data/protocols.md#ref-record-protocols) | [Docs for AI](ai/index.md#ref-docs-ai)
+[Get started](get-started.md#ref-get-started) | [webCAN](software-tools/webcan.md#ref-software-webcan) | [python-can](software-tools/python.md#ref-software-python) | [Protocols (J1939, …)](stream-data/protocols.md#ref-record-protocols) | [Connect](connect.md#ref-connect) | [Docs for AI](ai/index.md#ref-docs-ai)
 
 ---
 
@@ -124,11 +137,12 @@ In this section we outline useful software/API tools that are ready-to-use with 
 The tools outlined below are built on the CANsub REST / WebSocket API - with the ‘custom apps’ section providing tips on how you can build your own apps and integrations.
 
 1. [webCAN](software-tools/webcan.md#ref-software-webcan) - browser-based GUI served directly by the device (zero installation)
-2. [Python](software-tools/python.md#ref-software-python) - python-can integration enabling powerful programmatic workflows
-3. [SavvyCAN](software-tools/savvycan.md#ref-software-savvycan) - desktop GUI popular for CAN hacking / reverse-engineering
-4. [PlotJuggler](software-tools/plotjuggler.md#ref-software-plotjuggler) - desktop GUI for advanced real-time time-series plotting
-5. [Custom apps](software-tools/custom-apps.md#ref-software-custom-apps) - build your own integrations on top of the open REST / WebSocket API
-6. [AI assistants](software-tools/ai.md#ref-software-ai) - build CANsub apps faster with ChatGPT, Claude Code, etc
+2. [python-can](software-tools/python.md#ref-software-python) - registers the CANsub as a python-can interface for programmatic workflows
+3. [SocketCAN](software-tools/socketcan.md#ref-software-socketcan) - exposes the CANsub as a SocketCAN interface on Linux via a Python-based daemon (early access)
+4. [SavvyCAN](software-tools/savvycan.md#ref-software-savvycan) - desktop GUI popular for CAN hacking / reverse-engineering
+5. [PlotJuggler](software-tools/plotjuggler.md#ref-software-plotjuggler) - desktop GUI for advanced real-time time-series plotting
+6. [Custom apps](software-tools/custom-apps.md#ref-software-custom-apps) - build your own integrations on top of the open REST / WebSocket API
+7. [AI assistants](software-tools/ai.md#ref-software-ai) - build CANsub apps faster with ChatGPT, Claude Code, etc
 
 # index.html.md
 
@@ -154,6 +168,184 @@ The [CANsub.2 Docs](https://canlogger.csselectronics.com/cansub-docs/cansub2/) a
 
 #### NOTE
 See also our [AI assistants](../software-tools/ai.md#ref-software-ai) guide for how to use the material
+
+# index.html.md
+
+<a id="ref-connect-lan"></a>
+
+# LAN
+
+![CANsub LAN setup](https://canlogger1000.csselectronics.com/img/cansub-2-can-bus-ethernet-test-lab-scale.svg)
+
+Connecting the CANsub to a network via Ethernet makes it accessible from any PC on that network - useful in shared lab/office setups.
+
+1. Power the CANsub via USB (from a USB power supply)<sup>[1](#usbhost)</sup>
+2. Connect the Ethernet port to a network with a DHCP server<sup>[2](#dhcp)</sup>
+3. Note the device URL on the LCD (e.g. `https://1f72d84a-eth.local`)
+4. Open the URL in a browser on any PC on the network
+
+---
+* <a id='usbhost'>**[1]**</a> If powered from a PC instead, the device detects the USB host at power-on and selects USB-mode, ignoring Ethernet - see the [data interface](https://canlogger.csselectronics.com/cansub-docs/cansub2/connection/data_interface.html) selection logic
+* <a id='dhcp'>**[2]**</a> The CANsub requests its address via DHCP - on networks with MAC whitelisting, your IT admin may need to whitelist the device. You can also optionally set a stable IP for the CANsub based on its MAC via the router.
+
+# index.html.md
+
+<a id="ref-connect-remote"></a>
+
+# Remote
+
+You can access a CANsub from anywhere over the internet by placing it behind a VPN. The CANsub itself needs no changes - it simply sits on a LAN, while the VPN makes that LAN reachable from your PC. This enables advanced use cases like remote troubleshooting, OTA ECU configuration and more. Below we show two common setups.
+
+> ##### Table of Contents
+> 
+> * [Example 1: Office VPN](#example-1-office-vpn)
+> * [Example 2: LTE router + cloud VPN](#example-2-lte-router-cloud-vpn)
+>   * [1: Deploy the VPN server](#deploy-the-vpn-server)
+>   * [2: Configure the RUT200 LTE router](#configure-the-rut200-lte-router)
+>   * [3: Connect your PC](#connect-your-pc)
+>   * [4: Access the CANsub](#access-the-cansub)
+>   * [5: Scale up](#scale-up)
+>   * [Latency considerations (RX)](#latency-considerations-rx)
+>   * [Latency considerations (TX)](#latency-considerations-tx)
+
+---
+
+## Example 1: Office VPN
+
+![CANsub VPN office CAN bus remote access](https://canlogger1000.csselectronics.com/img/cansub-remote-vpn-office-can-bus-access.svg)
+
+If your CANsub sits in a lab/office that already runs a VPN (e.g. OpenVPN or WireGuard on the office gateway), you can access it from home like any other office resource:
+
+1. Connect the CANsub to the office LAN (see [LAN](lan.md#ref-connect-lan)) and note its IP
+2. Optionally assign a fixed IP via a DHCP reservation in the office router
+3. Connect to the office VPN from home as usual, then open `https://<ip>` in your browser<sup>[1](#hostsentry)</sup>
+
+This setup requires no new infrastructure and typically performs well<sup>[2](#officelatency)</sup>, as the office gateway handles the VPN encryption.
+
+Note that automatic device discovery (mDNS) does not work across the VPN, so tools like python-can-cansub will not auto-detect devices - instead, reference them by IP<sup>[3](#vpndiscovery)</sup>.
+
+---
+
+## Example 2: LTE router + cloud VPN
+
+![CAN bus streaming via LTE VPN real-time](https://canlogger1000.csselectronics.com/img/cansub-remote-lte-vpn-field-cloud.svg)
+
+For CANsub units deployed in the field (e.g. in a vehicle or a remote machine), the typical setup is an LTE router with a VPN connection. In this setup, the router dials out to a fixed VPN server over its SIM card<sup>[6](#databudget)</sup> and your PC connects to the same server. The concept works with most VPN-capable LTE routers and VPN server hosts.
+
+Below we show an example setup: A Teltonika RUT200 LTE router and an AWS Lightsail VPN server (~5 USD/month). This can be deployed in ~30 min.
+
+#### NOTE
+You can see this setup in action in our [CAN + Ethernet intro](https://www.csselectronics.com/pages/can-bus-ethernet-interface-wifi-lte)
+
+#### WARNING
+Remote CANsub access via LTE involves drastically higher latency than USB, LAN or WiFi and is only suited for some use cases<sup>[4](#ltelatency)</sup>
+
+### 1: Deploy the VPN server
+
+1. [Sign up](https://portal.aws.amazon.com/billing/signup#/start) for a free AWS account and login
+2. Open [this link](https://console.aws.amazon.com/cloudformation/home?#/stacks/create/review?templateURL=https://s3.eu-central-1.amazonaws.com/css-electronics-resources/cansub-stacks/lightsail-wireguard-vpn-v1.0.0.json&stackName=cansub-vpn-stack) in a new tab<sup>[7](#quickcreate)</sup>
+3. Select a region close to where your PC and CANsub are deployed<sup>[8](#region)</sup>
+4. Click ‘Create stack’ and wait ~5 min for it to complete
+5. In AWS go to ‘Lightsail’, open the instance SSH and run `sudo show-client-configs`<sup>[9](#browserssh)</sup>
+6. This produces credentials for 2 routers and 1 PC - store this safely for use in the next steps
+
+### 2: Configure the RUT200 LTE router
+
+1. Power on the router, join the router WiFi (see label) and open `https://192.168.1.1`
+2. Set a new user/password for the router when logging in
+3. Download and double-click the [`RUT200 setup script`](/_static/files/connect/remote/rut200-setup.bat)
+4. Enter the values from the `router-1` config when prompted, incl. the router password
+5. Enter your SIM card APN and optionally the SIM
+6. Verify that you can now access the router setup page via `https://192.168.144.1`
+7. Go to `https://192.168.144.1/status/network/mobile` and verify your SIM connection
+8. Disconnect from the RUT200 WiFi network
+
+### 3: Connect your PC
+
+1. Install [WireGuard](https://www.wireguard.com/install/) on your PC
+2. Add an empty tunnel, paste the AWS Lightsail `pc-1` config and click ‘Activate’
+
+### 4: Access the CANsub
+
+1. Ensure your PC is *not* connected via WiFi to the RUT200
+2. Power your CANsub unit(s) via USB (not from a PC)
+3. Connect your CANsub unit(s) to the router’s LAN/WAN ports
+4. Verify that you can open webCAN via the device URL (e.g. `https://fea7353d-eth.local`)<sup>[10](#hostnames)</sup>
+
+### 5: Scale up
+
+To add more routers or PCs later, run one command in the server’s SSH terminal:
+
+* `sudo add-client router` - adds a new router client (with its own LAN subnet)
+* `sudo add-client pc` - adds a new PC client (each user/PC needs its own)
+
+The new client config is printed immediately - no other changes are required.
+
+### Latency considerations (RX)
+
+If you deploy the CANsub in an LTE setup, it is important to recognize that the resulting high latency will put some restrictions on what you can expect from the device.
+
+For example, if your goal is to monitor CAN data remotely (e.g. for remote troubleshooting), you should expect that CAN frames arrive with jitter/spikes/delays. This means e.g. a plot in webCAN may ‘jump back and forth’. However, the *CAN frame timestamping* is done by the CANsub ‘at the edge’ - meaning that the absolute and relative CAN frame timestamps remain valid. However, if you are attempting to stream a lot of CAN frames over a high-latency connection, you may experience actual dropouts (i.e. frame loss) as the CANsub’s buffer will eventually overflow.
+
+You can see these RX implications in the plots below. In both plots, a CANsub streams data to a python-can client on a PC via the LTE setup outlined above. In the 1st plot, the LTE connection is more stable and no frames are lost. In the 2nd plot, frames are lost due to latency spikes.
+
+To minimize the risk of frame loss in LTE setups you can configure edge-based device filters.
+
+![CAN bus stream via LTE to Python mild latency](https://www.csselectronics.com/cdn/shop/files/cansub-can-bus-stream-via-lte-to-python-mild-latency.png)![CAN bus stream via LTE to Python high latency](https://www.csselectronics.com/cdn/shop/files/cansub-can-bus-stream-via-lte-to-python-high-latency.png)
+
+### Latency considerations (TX)
+
+An alternative use case may be to use the CANsub to transmit custom CAN frames into a remote CAN bus via LTE. This can be relevant to e.g. request additional data via OBD/UDS/J1939/… - or it can be used to e.g. configure/calibrate an ECU remotely.
+
+For such use cases you can consider below paths:
+
+1: When possible, we recommend to use the **edge-based transmit sequences** on the CANsub as they are latency-independent. This lets you achieve TX timing precision of 10 microseconds. This is ideal for e.g. OBD2/UDS requests or short configuration sequences.
+
+2: If you need to send extensive/dynamic CAN frame sequences, you may need to create pure **host-scheduled transmission** via e.g. Python scripts. In this case, your transmission is exposed to latency, which means that your receiving CAN node must be resilient towards the resulting variation in interframe spacing. To illustrate the challenge, below plot shows a scenario where a CANsub uses host-scheduled transmission to send custom CAN frames to a recipient via LTE - with a target interframe spacing of 150 ms. As evident, the frames *typically* arrive with reasonable precision - but spikes can result in outliers<sup>[5](#txack)</sup>.
+
+![CAN bus TX stream via LTE to Python high latency](https://www.csselectronics.com/cdn/shop/files/cansub-transmit-can-bus-frames-via-lte-python-can.png)
+
+3: Finally, you can **mix** the above. For example, you can create a python-can script where an XCP seed & key authentication is performed via host-scheduled transmission, after which subsequent CAN frames are sent via transmit sequences.
+
+---
+* <a id='hostsentry'>**[1]**</a> mDNS hostnames do not cross a VPN, so the IP-based URL shows a certificate warning. For warning-free access, map the hostname in your hosts file, e.g. `Add-Content C:\Windows\System32\drivers\etc\hosts "<ip> <hostname>-eth.local"` (admin PowerShell)
+* <a id='officelatency'>**[2]**</a> In our tests of this setup, the observed latency was 10-20 ms
+* <a id='vpndiscovery'>**[3]**</a> python-can-cansub accepts `<ip>@<channel>` in place of hostnames. To find the IPs of all CANsub units behind a VPN, you can run [`this discovery script`](/_static/files/connect/remote/discover_cansub_remote.py) - it sweeps VPN-routed subnets over HTTPS and lists each device’s ID, IP and python-can configs
+* <a id='ltelatency'>**[4]**</a> The latency will depend on many factors (LTE coverage, carrier, server region, distances, LTE antenna placement, …). In our tests we observed a latency of 80-120 ms, with periodic spikes of 200-400 ms. If the CANsub is streaming many frames/second (e.g. 1K+ FPS) the latency/spikes increase. The setup is best suited for specialized use cases.
+* <a id='txack'>**[5]**</a> The plot illustrates why it can be relevant to await the CAN frame acknowledgement from the CANsub when using host-scheduled transmission, with the left-side plot showing a case where frames are sent ‘unconditionally’, while the right-side plot requires that the previous frame ACK is received first. See also [`this illustrative script example`](/_static/files/connect/remote/tx_ack_example.py)
+* <a id='databudget'>**[6]**</a> Streaming over LTE costs ~150 B per CAN frame (~0.5 GB/hour unfiltered) on the SIM data plan - use CANsub filters to reduce this
+* <a id='quickcreate'>**[7]**</a> The link opens an AWS CloudFormation ‘quick-create’ stack, deploying pre-defined resources in your AWS account: a Lightsail instance (~5 USD/month) with a fixed IP, set up as a WireGuard VPN server. You can review the [`template`](/_static/files/connect/remote/lightsail-wireguard-vpn-v1.0.0.json) - and if you are not the AWS account owner, you can forward this guide to the relevant persons
+* <a id='region'>**[8]**</a> Change the region via the AWS console upper right corner. All traffic routes via the server, so a nearby region minimizes latency - the template deploys into whichever region you select
+* <a id='browserssh'>**[9]**</a> In the Lightsail instance list, click the blue `>_` button (‘Connect via SSH’) to open a browser based SSH terminal
+* <a id='hostnames'>**[10]**</a> The setup script makes the router resolve device hostnames for VPN clients, and the PC config uses the router as DNS - devices behind additional routers instead require a hosts file entry (see Example 1)
+
+# index.html.md
+
+<a id="ref-connect-usb"></a>
+
+# USB
+
+![CANsub USB streaming interface CAN bus](https://canlogger1000.csselectronics.com/img/cansub-2-can-bus-interface-usb-stream-real-time.svg)
+
+Connecting the CANsub to your PC via USB is the simplest access method: One cable provides both power and data, and the device is exposed as a standard network interface.
+
+1. Connect the CANsub to your PC via the USB cable
+2. Note the device URL on the LCD (e.g. `https://1f72d84a-usb.local`)
+3. Open the URL in your browser to access webCAN
+
+USB is ideal for bench setups where a single PC uses the device.
+
+# index.html.md
+
+<a id="ref-connect-wifi"></a>
+
+# WiFi
+
+![CANsub WiFi streaming CAN bus data](https://canlogger1000.csselectronics.com/img/cansub-4-j1939-interface-truck-wifi-wireless-can-streaming.svg)
+
+If you connect the CANsub via Ethernet to a WiFi router (as in the [LAN](lan.md#ref-connect-lan) method) the device becomes accessible from any phone, tablet or PC on that WiFi network.
+
+This is useful e.g. for using webCAN on [any device](../software-tools/webcan/any-device.md#ref-webcan-any-device). Further, if the CANsub is connected to a WiFi router in e.g. a vehicle, it can allow service technicians to access the vehicle CAN bus via WiFi.
 
 # index.html.md
 
@@ -230,6 +422,7 @@ The CANsub Intro focuses on the following:
 
 * How to get started with the CANsub
 * How to handle protocol specific use cases
+* How to connect to the device (USB, LAN, WiFi, remote)
 * How to use relevant software tools
 
 The document is structured by the steps you go through when using the device for the first time.
@@ -243,7 +436,7 @@ For the full technical product manuals, see the separate **CANsub.2 Docs** and *
 * [CANsub.2 Docs](https://canlogger.csselectronics.com/cansub-docs/cansub2/)
 * [CANsub.4 Docs](https://canlogger.csselectronics.com/cansub-docs/cansub4/)
 
-The Docs detail the hardware, REST/WebSocket API, device connection (USB/Ethernet, mDNS, TLS), bit-timing reference and concepts beyond the scope of this Intro. Each variant’s Docs are also available as an AI/LLM-friendly text file - see the [Docs for AI](../ai/index.md) page.
+The Docs detail the hardware, REST/WebSocket API, connection details (mDNS, TLS certificates), bit-timing reference and concepts beyond the scope of this Intro. Each variant’s Docs are also available as an AI/LLM-friendly text file - see the [Docs for AI](../ai/index.md) page.
 
 ---
 
@@ -273,6 +466,12 @@ If you use an LLM/AI like ChatGPT or Claude Code to build CANsub scripts, apps o
 * The `cansub_intro_llm.txt` from the [Docs for AI](../ai/index.md#ref-docs-ai) section (this CANsub Intro)
 * For Python apps, provide the [python-can-cansub](python.md#ref-software-python) repository and refer to the `README.md`
 
+For repeat usage, ask your AI agent the below prompt:
+
+```text
+Make a global 'cansub-knowledge' skill from the two TXT files and the python-can-cansub folder.
+```
+
 #### NOTE
 The video shows how context lets Claude build a CANsub Python [app demo](python/demos/cansub-plot.md#ref-python-demo-cansub-plot) from 1 prompt
 
@@ -291,7 +490,8 @@ We **strongly recommend** seeing our [AI assistants](ai.md#ref-software-ai) guid
 > 
 > * [REST + WebSocket API](#rest-websocket-api)
 > * [Python apps](#python-apps)
-> * [Desktop GUI apps](#desktop-gui-apps)
+> * [Linux apps (SocketCAN)](#linux-apps-socketcan)
+> * [Desktop GUI apps (Qt)](#desktop-gui-apps-qt)
 > * [Web apps](#web-apps)
 > * [Tips & tricks](#tips-tricks)
 >   * [Dynamic input fields](#dynamic-input-fields)
@@ -310,7 +510,7 @@ The REST API is used for device configuration and state monitoring, while the We
 
 ## Python apps
 
-For custom Python apps use our [Python API](python.md#ref-software-python) as the starting point, which handles below:
+For custom Python apps use our [python-can](python.md#ref-software-python) integration as the starting point, which handles:
 
 * Device discovery & configuration
 * WebSocket framing and reconnection for raw data streaming
@@ -320,9 +520,15 @@ The python-can integration lets you immediately integrate with numerous open sou
 
 ---
 
-## Desktop GUI apps
+## Linux apps (SocketCAN)
 
-For custom desktop GUI apps use our Qt plugin (C++) as the starting point, which handles below:
+On Linux, our [SocketCAN](socketcan.md#ref-software-socketcan) daemon exposes the CANsub as a standard SocketCAN network interface. This lets you build (or reuse) any SocketCAN-based app, in any language, without touching the REST / WebSocket API directly - e.g. C apps using the kernel socket API.
+
+---
+
+## Desktop GUI apps (Qt)
+
+For custom desktop GUI apps use our [Qt plugin](https://github.com/CSS-Electronics/qt-cansub/releases) (C++) as the starting point, which handles below:
 
 * Device discovery & configuration
 * WebSocket framing and reconnection for raw data streaming
@@ -361,7 +567,7 @@ To ensure an app is reusable across different CAN applications and devices, it i
 
 When you aim to build a custom app, your first choice will be what platform to start from.
 
-For most use cases, **Python** will be a good starting point as it lets you quickly create very simple apps - while also enabling advanced functionality due to the extensive add-on tools that work with python-can (see e.g. our [protocols](../stream-data/protocols.md#ref-record-protocols) section). If you are just building an ad hoc tool for use by yourself or your own team, this is often the best starting point.
+For most use cases, **Python** will be a good starting point as it lets you quickly create very simple apps - while also enabling advanced functionality due to the extensive add-on tools that work with python-can (see e.g. our [protocols](../stream-data/protocols.md#ref-record-protocols) section). If you are just building an ad hoc tool for use by yourself or your own team, this is often the best starting point. On Linux, the [SocketCAN](socketcan.md#ref-software-socketcan) daemon is an alternative starting point if you have existing SocketCAN-based apps/tools.
 
 The downside of Python is sharing: End users either need Python installed, or you bundle the app into an `*.exe` (e.g. via PyInstaller), which tends to be large, per-OS and prone to antivirus flags<sup>[2](#flask)</sup>. For polished desktop apps you distribute to others, a **Qt plugin** app (C++) instead compiles to a lean native `*.exe` - at the cost of more complex development and CAN libraries/packages that are not as rich as in Python.
 
@@ -383,6 +589,9 @@ The downside of Python is sharing: End users either need Python installed, or yo
 > ##### Table of Contents
 > 
 > * [Installation](#installation)
+>   * [Windows](#windows)
+>   * [Linux (x86_64/amd64)](#linux-x86-64-amd64)
+>   * [Linux (ARM64)](#linux-arm64)
 > * [Connect your CANsub & load DBC](#connect-your-cansub-load-dbc)
 > * [Create split plot views](#create-split-plot-views)
 > * [Add XY scatter plots](#add-xy-scatter-plots)
@@ -395,7 +604,24 @@ The downside of Python is sharing: End users either need Python installed, or yo
 
 Download the build below, unzip it and open PlotJuggler.
 
-<a href="https://canlogger.csselectronics.com/files/plotjuggler/260606-plotjuggler-windows.zip" class="btn-white btn-blue">Windows</a>
+### Windows
+
+* [PlotJuggler](https://canlogger.csselectronics.com/files/plotjuggler/windows/260904-plotjuggler-windows-0400.zip) [API: 04.00]
+* [PlotJuggler](https://canlogger.csselectronics.com/files/plotjuggler/windows/260810-plotjuggler-windows-0300.zip) [API: 03.00]
+* [PlotJuggler](https://canlogger.csselectronics.com/files/plotjuggler/windows/260606-plotjuggler-windows-0200.zip) [API: 02.00]
+
+### Linux (x86_64/amd64)
+
+* [PlotJuggler](https://canlogger.csselectronics.com/files/plotjuggler/linux-x86/260904-plotjuggler-linux-x86-64-0400.zip) [API: 04.00]
+* [PlotJuggler](https://canlogger.csselectronics.com/files/plotjuggler/linux-x86/260810-plotjuggler-linux-x86-64-0300.zip) [API: 03.00]
+
+### Linux (ARM64)
+
+* [PlotJuggler](https://canlogger.csselectronics.com/files/plotjuggler/linux-arm64/260904-plotjuggler-linux-arm64-0400.zip) [API: 04.00]
+* [PlotJuggler](https://canlogger.csselectronics.com/files/plotjuggler/linux-arm64/260810-plotjuggler-linux-arm64-0300.zip) [API: 03.00]
+
+#### NOTE
+The API version for each CANsub firmware release is listed in the CANsub Docs changelog
 
 ---
 
@@ -434,7 +660,7 @@ Create new customized signals from existing ones using scripted Lua-style transf
 
 <a id="ref-software-python"></a>
 
-# Python
+# python-can
 
 ```python
 import can, cantools
@@ -475,7 +701,10 @@ We **strongly recommend** seeing our [AI assistants](ai.md#ref-software-ai) guid
 
 Download the GitHub repository and follow the README documentation:
 
-<a href="https://github.com/CSS-Electronics/python-can-cansub" class="btn-white btn-blue">python-can-cansub</a>
+* [python-can-cansub](https://github.com/CSS-Electronics/python-can-cansub)
+
+#### NOTE
+Each python-can-cansub release supports one API version. The API version for each CANsub firmware release is listed in the CANsub Docs changelog
 
 # index.html.md
 
@@ -483,18 +712,21 @@ Download the GitHub repository and follow the README documentation:
 
 # SavvyCAN
 
-[About](https://www.csselectronics.com/pages/can-bus-interface-savvycan) | [CAN BUS REVERSE ENGINEERING](https://www.csselectronics.com/pages/can-bus-sniffer-reverse-engineering)
+[About](https://www.csselectronics.com/pages/can-bus-interface-savvycan) | [CAN BUS REVERSE ENGINEERING](https://www.csselectronics.com/pages/can-bus-sniffer-reverse-engineering) | [AI CAN BUS REVERSE ENGINEERING](https://www.csselectronics.com/pages/can-bus-reverse-engineering-ai-llm-claude)
 
 ---
 
 SavvyCAN is a popular open source tool for CAN bus reverse engineering use cases.
 
 #### NOTE
-We **strongly recommend** [webCAN](webcan.md#ref-software-webcan) for most use cases as it is superior to SavvyCAN. SavvyCAN is mainly recommended for some specialized reverse engineering features
+You can use SavvyCAN with your CANsub, but we **strongly recommend** [webCAN](webcan.md#ref-software-webcan) for most general CAN streaming use cases - and [AI agents](https://www.csselectronics.com/pages/can-bus-reverse-engineering-ai-llm-claude) for pure reverse engineering use cases
 
 > ##### Table of Contents
 > 
 > * [Installation](#installation)
+>   * [Windows](#windows)
+>   * [Linux (x86_64/amd64)](#linux-x86-64-amd64)
+>   * [Linux (ARM64)](#linux-arm64)
 > * [Connect your CANsub](#connect-your-cansub)
 > * [Main window](#main-window)
 > * [Load files (DBCs, log files)](#load-files-dbcs-log-files)
@@ -507,7 +739,24 @@ We **strongly recommend** [webCAN](webcan.md#ref-software-webcan) for most use c
 
 Download the build below (incl. the required plugin), unzip it and open SavvyCAN.
 
-<a href="https://canlogger.csselectronics.com/files/savvycan/260606-savvycan-windows.zip" class="btn-white btn-blue">Windows</a>
+### Windows
+
+* [SavvyCAN](https://canlogger.csselectronics.com/files/savvycan/windows/260904-savvycan-windows-0400.zip) [API: 04.00]
+* [SavvyCAN](https://canlogger.csselectronics.com/files/savvycan/windows/260810-savvycan-windows-0300.zip) [API: 03.00]
+* [SavvyCAN](https://canlogger.csselectronics.com/files/savvycan/windows/260606-savvycan-windows-0200.zip) [API: 02.00]
+
+### Linux (x86_64/amd64)
+
+* [SavvyCAN](https://canlogger.csselectronics.com/files/savvycan/linux-x86/260904-savvycan-linux-x86-64-0400.zip) [API: 04.00]
+* [SavvyCAN](https://canlogger.csselectronics.com/files/savvycan/linux-x86/260810-savvycan-linux-x86-64-0300.zip) [API: 03.00]
+
+### Linux (ARM64)
+
+* [SavvyCAN](https://canlogger.csselectronics.com/files/savvycan/linux-arm64/260904-savvycan-linux-arm64-0400.zip) [API: 04.00]
+* [SavvyCAN](https://canlogger.csselectronics.com/files/savvycan/linux-arm64/260810-savvycan-linux-arm64-0300.zip) [API: 03.00]
+
+#### NOTE
+The API version for each CANsub firmware release is listed in the CANsub Docs changelog
 
 ---
 
@@ -516,7 +765,9 @@ Download the build below (incl. the required plugin), unzip it and open SavvyCAN
 1. Ensure your CANsub is ready for streaming (see the [get started section](../get-started.md#ref-get-started))
 2. Click ‘Connection/Open Connection Window/Add New Device Connection’
 3. Select ‘QT SerialBus Devices/CANsub’ and select from the available CANsub CAN channels
-4. Click ‘Create New Connection’, then update the bit-rate settings to match your CAN bus<sup>[1](#fn-nodata)</sup>
+4. Click ‘Create New Connection’, update the bit-rate and click ‘Save Bus Settings’<sup>[1](#fn-nodata)</sup>
+
+<br/>
 
 ---
 
@@ -535,7 +786,7 @@ Below we outline a number of key functionalities of the main window:
 
 To load a DBC file, click File/DBC File Manager/Load and set the ID match criteria (`Exact`/`J1939`). You can toggle DBC decoding via the ‘Interpret Frames’ button.
 
-You can also load a previously saved log file (File/Load Log File) for offline analysis. For example, you can take a webCAN CSV export and convert it to Vector ASC via the [Python](python.md#ref-software-python) `can_logconvert` CLI tool, then load the output in SavvyCAN<sup>[2](#exact-file)</sup>.
+You can also load a previously saved log file (File/Load Log File) for offline analysis. For example, you can take a webCAN CSV export and convert it to Vector ASC via the [python-can](python.md#ref-software-python) `can_logconvert` CLI tool, then load the output in SavvyCAN<sup>[2](#exact-file)</sup>.
 
 ---
 
@@ -592,7 +843,7 @@ Interval: 1000
 The Playback window lets you load a CAN bus log file and replay it onto a CAN bus. This can be useful in e.g. reverse engineering use cases or simulation. You can use the ‘original frame timing’ when playing it back and optionally filter the data to only replay a subset of the CAN frames.
 
 #### NOTE
-We recommend the [Python](python.md#ref-software-python) `can_player` CLI tool for playback as it offers better performance
+We recommend the [python-can](python.md#ref-software-python) `can_player` CLI tool for playback as it offers better performance
 
 ---
 <!-- Known limitations of SavvyCAN -->
@@ -608,6 +859,36 @@ We recommend the [Python](python.md#ref-software-python) `can_player` CLI tool f
 * <a id='exact-file'>**[2]**</a> You need to specify the file format before opening the file in SavvyCAN, as ‘auto detect’ won’t work for Vector ASC files
 * <a id='fn-rangestate'>**[3]**</a> The tool plots the decimal values of the extracted bits based on your criteria (using an offset of 0 and a scale factor of 1). To get the final signal, you’ll need to identify how to offset/scale the chart, though this is typically a fairly simple task. The tool is ideal for post processing - e.g. if you’ve logged data during a trip while you’ve made timestamped notes of the physically observable values (e.g. speed in km/h). Your notes can be used to produce a ‘rough graph’, which can then be compared vs the suggested signal plots
 <!-- .. [#sorting] The CANsub timestamps every CAN frame on the device before sending it to the client software. However, data is not sorted across channels by the CANsub - this has to be done by the software. In webCAN, the trace view ensures cross-channel sorting of frames based on their timestamps - but in SavvyCAN, frames are sorted based purely on their arrival time -->
+
+# index.html.md
+
+<a id="ref-software-socketcan"></a>
+
+# SocketCAN
+
+```console
+user@host:~$ cansub_daemon --remote 1f72d84a-usb.local@1 --bitrate 500000
+
+user@host:~$ candump -t a cansub0
+ (1788353400.118342)  cansub0  0CF00400   [8]  F0 7D 84 A0 12 00 F0 7D
+ (1788353400.128355)  cansub0  18FEF100   [8]  C0 FF 4B 70 D0 FF 3F FF
+ (1788353400.130542)  cansub0  18F00E00   [8]  FF FF FF FF FF 4B 39 FF
+ (1788353400.140507)  cansub0  0CF00400   [8]  F0 7D 84 A6 12 00 F0 7D
+ (1788353400.142349)  cansub0  18FEEE00   [8]  5A FF FF FF 4E 13 FF FF
+ (1788353400.145560)  cansub0  18FEF200   [8]  38 01 FF FF 5E 0C 00 FF
+ (1788353400.150584)  cansub0  0CF00400   [8]  F0 7D 84 AC 12 00 F0 7D
+ (1788353400.152561)  cansub0  18FEDF00   [8]  FF 8C 15 FF FF FF FF FF
+ (1788353400.156967)  cansub0  18FEF500   [8]  FF FF 6A 4C FF FF FF FF
+ (1788353400.165551)  cansub0  0CF00400   [8]  F0 7D 84 B2 12 00 F0 7D
+```
+
+---
+
+[SocketCAN](https://www.kernel.org/doc/html/latest/networking/can.html) is the standard CAN bus networking stack in the Linux kernel. Our Python-based daemon exposes the CANsub as a regular SocketCAN network interface on Linux, making it compatible with the large ecosystem of SocketCAN tools and libraries (e.g. `can-utils`).
+
+## Installation & get started
+
+You can [contact us](https://www.csselectronics.com/pages/contact-us) to receive the installation guide and files.
 
 # index.html.md
 
@@ -654,7 +935,60 @@ Types of changes:
 - "Known issues": Known issues
 - "Warning": Warnings
 
-## [02.02.00] - 2026-06-02
+## [FW 02.05.00, API: 05.00] - 2026-09-22
+
+### Added
+- PTP (IEEE 1588) status icon in the header (green tracking, orange acquiring, gray idle/off)
+- CAN connections are blocked if the device is acquiring a PTP lock to avoid mid-session timestamp jumps
+- Filter panel groups signals under their message, with expand/collapse and a per-message checkbox
+- Chart time windows support up to 30 minute views when browing historical data (not in live mode)
+- Dark mode toggle in the header
+- Button for rebooting the device
+- Green lock icon in the header when a client certificate is loaded (mTLS enabled)
+- DBC message and signal comments shown on hover in the decoded Trace and Summary views
+
+### Changed
+- API version updated to 05.00
+- Device configuration file renamed to cansub-config-<api_version>.json
+- Device clock is set only at startup and only if no PTP master is found
+- Status bar blanks stale values and a bus disconnect is reflected in the UI 
+- If a device reset is detected, webCAN prompts the user to reload the page
+- CSV import rejects invalid rows with a reason and sorts out-of-order rows
+- Importing a Summary or decoded CSV export explains that only raw Trace exports can be imported
+
+### Fixed
+- DBC extended multiplexing: SG_MUL_VAL_ ranges decode correctly and the multiplexor uses its raw value
+- DBC messages with the same ID as 11-bit and29-bit are decoded as separate messages
+- A DBC defining the same ID twice is rejected
+
+## [FW 02.04.00, API: 04.00] - 2026-08-17
+
+### Changed
+- API version updated to 04.00
+- CSV export derives DataLength from DLC, not number of data bytes (affects RTR frames only)
+
+## [FW 02.03.00, API: 03.00] - 2026-07-01
+
+### Added
+- View/edit text labels for each transmit frame (saved/loaded with device configuration files)
+- DBC encoder fills a transmit frame's label with the DBC message name when the frame has no label
+- Decoded signals display DBC value-table (enum) text as 'unit' if available
+- Resizable MESSAGE, SIGNAL, VALUE and UNIT columns in the decoded Trace and Summary views
+- Warning when removing all hardware filters from a CAN channel
+- Re-uploading a DBC file with an existing name updates it in place (faster DBC editing workflow)
+
+### Changed
+- API version updated to 03.00
+- Transmit sequence 'limit' value is capped at the device maximum (4294967294)
+- DBC files can only be uploaded or replaced while all CAN buses are disconnected
+- Device clock re-syncs if it drifts beyond 2000 ms (not only at initialization)
+
+### Fixed
+- Transmit Sequences panel always updates immediately after loading a configuration  
+- Chart view cursor tooltip formats signal units correctly
+- Device REST error responses (e.g. failed writes) are shown in notifications
+
+## [FW 02.02.00, API: 02.00] - 2026-06-02
 
 ### Added
 - Transmit DBC encoder search dropdown entry limit changed from 50 to 500 
@@ -668,7 +1002,7 @@ Types of changes:
 ### Fixed
 - Trace view frame count now updates when filters change without incoming data
 
-## [02.00.00] - 2026-05-18
+## [FW 02.00.00, API: 02.00] - 2026-05-18
 
 ### Added
 - Initial release
@@ -733,7 +1067,7 @@ webCAN cannot express variable interframe spacing - a CANedge channel with uneve
 
 ### Example 2: Convert CANedge transmit list to Python sequence
 
-You can also load a CANedge Configuration File directly in [Python](../software-tools/python.md#ref-software-python) for use in e.g. a custom transmit list streamed by the CANsub. The `load_transmit_schedule` function parses the CANedge transmit list into a `PERIOD` and `SCHEDULE` that you can stream client-side:
+You can also load a CANedge Configuration File directly via [python-can](../software-tools/python.md#ref-software-python) for use in e.g. a custom transmit list streamed by the CANsub. The `load_transmit_schedule` function parses the CANedge transmit list into a `PERIOD` and `SCHEDULE` that you can stream client-side:
 
 ```python
 from time import sleep, monotonic
@@ -785,7 +1119,7 @@ We recommend that you read our [CANopen intro](https://www.csselectronics.com/pa
 > 
 > * [CANopen DBC vs EDS files](#canopen-dbc-vs-eds-files)
 > * [Stream CANopen data (webCAN)](#stream-canopen-data-webcan)
-> * [Stream CANopen data (Python)](#stream-canopen-data-python)
+> * [Stream CANopen data (python-can)](#stream-canopen-data-python-can)
 >   * [Advanced: CANopen EDS decoding](#advanced-canopen-eds-decoding)
 >   * [Advanced: CANopen master / SDO client](#advanced-canopen-master-sdo-client)
 
@@ -819,9 +1153,9 @@ CANopen Process Data Objects (PDOs) are broadcast and require no transmit config
 
 ---
 
-## Stream CANopen data (Python)
+## Stream CANopen data (python-can)
 
-You can also stream CANopen data via the CANsub [Python API](../software-tools/python.md#ref-software-python).
+You can also stream CANopen data via the CANsub [python-can](../software-tools/python.md#ref-software-python) integration.
 
 Below is a simple example showcasing DBC decoding of raw CANopen PDO/SDO data:
 
@@ -942,7 +1276,7 @@ We recommend that you read our [J1939 intro](https://www.csselectronics.com/page
 >   * [Advanced: Multi-frame messages (J1939 TP)](#advanced-multi-frame-messages-j1939-tp)
 >   * [Advanced: Decode J1939-73 DM1 (DTCs)](#advanced-decode-j1939-73-dm1-dtcs)
 >   * [Advanced: Request J1939 data](#advanced-request-j1939-data)
-> * [Stream J1939 data (Python)](#stream-j1939-data-python)
+> * [Stream J1939 data (python-can)](#stream-j1939-data-python-can)
 >   * [Advanced: Multi-frame messages (J1939 TP)](#id6)
 
 ---
@@ -1016,9 +1350,9 @@ A vehicle might not respond to your request - and caution should be taken when t
 
 ---
 
-## Stream J1939 data (Python)
+## Stream J1939 data (python-can)
 
-You can also stream J1939 data via the CANsub [Python API](../software-tools/python.md#ref-software-python) incl. PGN-based DBC decoding:
+You can also stream J1939 data via [python-can](../software-tools/python.md#ref-software-python) incl. PGN-based DBC decoding:
 
 ```python
 import can, cantools
@@ -1103,7 +1437,7 @@ We recommend that you read our [NMEA 2000 intro](https://www.csselectronics.com/
 > * [Stream NMEA 2000 data (webCAN)](#stream-nmea-2000-data-webcan)
 >   * [PGN mode](#pgn-mode)
 >   * [Advanced: Multi-frame messages (Fast Packets)](#advanced-multi-frame-messages-fast-packets)
-> * [Stream NMEA 2000 data (Python)](#stream-nmea-2000-data-python)
+> * [Stream NMEA 2000 data (python-can)](#stream-nmea-2000-data-python-can)
 >   * [Advanced: Multi-frame messages (Fast Packets)](#id4)
 
 ---
@@ -1147,9 +1481,9 @@ Some NMEA 2000 messages are larger than 8 bytes. These are split using [NMEA 200
 
 ---
 
-## Stream NMEA 2000 data (Python)
+## Stream NMEA 2000 data (python-can)
 
-You can also stream NMEA 2000 data via the CANsub [Python API](../software-tools/python.md#ref-software-python) incl. PGN-based DBC decoding. See the J1939 section for basic examples.
+You can also stream NMEA 2000 data via [python-can](../software-tools/python.md#ref-software-python) incl. PGN-based DBC decoding. See the J1939 section for basic examples.
 
 <br/>
 
@@ -1220,8 +1554,11 @@ We **strongly recommend** that you read our [OBD2 intro](https://www.csselectron
 > 
 > * [OBD2 DBC file](#obd2-dbc-file)
 > * [Stream OBD2 data (webCAN)](#stream-obd2-data-webcan)
+>   * [1: Quickstart](#quickstart)
+>   * [2: Check ‘supported PIDs’](#check-supported-pids)
+>   * [3: Configure specific PIDs](#configure-specific-pids)
 >   * [Advanced: Multi-frame OBD2 data (ISO TP)](#advanced-multi-frame-obd2-data-iso-tp)
-> * [Stream OBD2 data (Python)](#stream-obd2-data-python)
+> * [Stream OBD2 data (python-can)](#stream-obd2-data-python-can)
 
 ---
 
@@ -1229,7 +1566,7 @@ We **strongly recommend** that you read our [OBD2 intro](https://www.csselectron
 
 First, download our OBD2 DBC file below:
 
-[`OBD2 DBC file`](https://canlogger.csselectronics.com/files/dbc-files/obd-dbc-files-v4.3.zip)
+[`OBD2 DBC file`](https://canlogger.csselectronics.com/files/dbc-files/obd-dbc-files-v4.4.zip)
 
 #### NOTE
 For most use cases load the ‘regular-version’ OBD2 DBC
@@ -1238,21 +1575,43 @@ For most use cases load the ‘regular-version’ OBD2 DBC
 
 ## Stream OBD2 data (webCAN)
 
-To record OBD2 data, the CANsub needs to transmit OBD2 requests onto the vehicle CAN bus. Below is an example setup for a car<sup>[1](#vehicletype)</sup> connected to CAN1 of your CANsub:
+To record OBD2 data, the CANsub needs to transmit OBD2 requests onto the vehicle CAN bus. Below is an example workflow for a car<sup>[3](#vehicletype)</sup> connected to CAN1 of your CANsub.
+
+### 1: Quickstart
 
 1. Load the OBD2 DBC file and assign it to CAN1
-2. Set the CAN1 bit-rate to 500K, ensure ‘Listen Only’ is disabled and click ‘connect’
-3. In the ‘Transmit Sequences’ panel click ‘Encode from DBC’ on the default entry
-4. Select `0x7DF OBD_TX`, modify the PID value (e.g. `12 = 0x0C = Engine RPM`) and click OK
-5. Click the ‘+’ button to add a new frame to the sequence (then repeat the above)
-6. Set ‘limit’ via the ‘infinity’ symbol, set ‘spacing’ to `300` and ‘period’ to `spacing x requests`
-7. Save the sequence, then hit the ‘reset’ button to start transmitting the requests
+2. Import the quickstart OBD2 transmit list<sup>[2](#obdid)</sup> in webCAN<sup>[1](#apiversion)</sup>: [`API: 03.00`](/_static/files/stream/obd/03.00/cansub-obd-transmit-list-quickstart.json) | [`API: 04.00`](/_static/files/stream/obd/04.00/cansub-obd-transmit-list-quickstart.json)
+3. Set the CAN1 bit-rate to 500K/1M, ensure ‘Listen Only’ is disabled and click ‘connect’<sup>[4](#vehicletest)</sup>
+4. Hit the ‘reset’ button on the sequence to start the requests
+5. Review if your car responds with ID `0x7E8` - if so, try plotting the results
+
+![CANsub OBD2 data plot decoded webCAN](https://www.csselectronics.com/cdn/shop/files/obd2-dbc-decoded-data-webcan-cansub-c.png)
+<br/>
+
+### 2: Check ‘supported PIDs’
+
+If you want to explicitly test what OBD2 PIDs your car supports, you can follow below steps:
+
+1. Load our ‘supported PIDs’ transmit list in webCAN: [`API: 03.00`](/_static/files/stream/obd/03.00/cansub-obd-transmit-list-supported-pids.json) | [`API: 04.00`](/_static/files/stream/obd/04.00/cansub-obd-transmit-list-supported-pids.json)
+2. Once loaded, start the transmit list
+3. Look at the decoded results in Summary view - PIDs with a value of 1 are supported
+4. Optionally export the decoded summary view to a CSV for review in e.g. Excel
+5. Proceed to configuring specific PIDs as below
+
+![DBC decoded OBD2 supported PIDs](https://www.csselectronics.com/cdn/shop/files/supported-pids-dbc-decoded-c.png)
+<br/>
+
+### 3: Configure specific PIDs
+
+In most use cases you’ll want to request specific OBD2 PIDs. You can do this by modifying the quickstart config above - and/or by following below steps:
+
+1. In the ‘Transmit Sequences’ panel click ‘Encode from DBC’ on the default entry
+2. Select `0x7DF OBD_TX`, modify the PID value (e.g. `12 = 0x0C = Engine RPM`) and click OK
+3. Click the ‘+’ button to add a new frame to the sequence (then repeat the above)
+4. Set ‘limit’ via the ‘infinity’ symbol, set ‘spacing’ to `300` and ‘period’ to `spacing x requests`
+5. Save the sequence, then hit the ‘reset’ button to start transmitting the requests
 
 ![CANsub webCAN OBD2 PID request transmit DBC encoder](https://www.csselectronics.com/cdn/shop/files/cansub-webcan-obd2-pid-request-transmit-dbc-v2-c.png)
-
-#### NOTE
-For vans/trucks you may need to test the bit-rate (250K vs. 500K), request IDs (11-bit vs. 29-bit) and protocol (OBD2 vs. WWH-OBD) as per the [OBD2 intro](https://www.csselectronics.com/pages/obd2-explained-simple-intro)
-
 <br/>
 
 ### Advanced: Multi-frame OBD2 data (ISO TP)
@@ -1267,9 +1626,9 @@ To decode ISO-TP data, use the ‘iso-tp-version’ of the OBD2 DBC. When assign
 
 ---
 
-## Stream OBD2 data (Python)
+## Stream OBD2 data (python-can)
 
-You can achieve the same result via the CANsub [Python API](../software-tools/python.md#ref-software-python). Below is a minimal script to request and stream OBD2 data in real-time with edge-based precision:
+You can achieve the same result via [python-can](../software-tools/python.md#ref-software-python). Below is a minimal script to request and stream OBD2 data in real-time with edge-based precision:
 
 ```python
 from time import sleep
@@ -1305,7 +1664,10 @@ with can.Bus(interface="cansub", channel=CHANNEL,
 For ISO-TP Python examples, see the [UDS section](uds-data.md#ref-record-uds-data)
 
 ---
-* <a id='vehicletype'>**[1]**</a> As per our OBD2 intro, cars typically use 500K as the bit-rate and 11-bit request IDs via the OBD2 protocol. If you instead need to request data from e.g. a truck, you may need to check if the bit-rate is 250K or 500K and which IDs/protocol to use
+* <a id='apiversion'>**[1]**</a> The transmit lists are identical except for the `api_version` field, which must match your device. The API version for each CANsub firmware release is listed in the CANsub Docs changelog
+* <a id='obdid'>**[2]**</a> The transmit lists assume 11-bit OBD2, i.e. requests are sent to the functional ID `0x7DF` (`"id": 2015` in the JSON). If the ‘supported PIDs’ test instead indicates that your vehicle uses 29-bit OBD2, you can use the same JSON files, but replace `0x7DF` with the 29-bit equivalent `0x18DB33F1` (`"id": 417018865`) and set `"is_extended": true` for each frame
+* <a id='vehicletype'>**[3]**</a> As per our OBD2 intro, cars typically use 500K as the bit-rate and 11-bit request IDs via the OBD2 protocol. If you instead need to request data from e.g. a truck, you may need to check if the bit-rate is 250K or 500K and which IDs/protocol to use
+* <a id='vehicletest'>**[4]**</a> For vans/trucks you may need to test the bit-rate (250K vs. 500K), request IDs (11-bit vs. 29-bit) and protocol (OBD2 vs. WWH-OBD) as per the [OBD2 intro](https://www.csselectronics.com/pages/obd2-explained-simple-intro)
 
 # index.html.md
 
@@ -1343,7 +1705,7 @@ We **strongly recommend** that you read our [UDS intro](https://www.csselectroni
 > * [UDS DBC file](#uds-dbc-file)
 > * [Stream UDS data (webCAN)](#stream-uds-data-webcan)
 >   * [Advanced: Multi-frame UDS data (ISO-TP)](#advanced-multi-frame-uds-data-iso-tp)
-> * [Stream UDS data (Python)](#stream-uds-data-python)
+> * [Stream UDS data (python-can)](#stream-uds-data-python-can)
 >   * [Mixed spacing requests](#mixed-spacing-requests)
 >   * [Advanced: Multi-frame UDS data (ISO-TP)](#id2)
 
@@ -1384,9 +1746,9 @@ webCAN supports ISO-TP with ‘normal’ addressing (not e.g. ‘extended’ add
 
 ---
 
-## Stream UDS data (Python)
+## Stream UDS data (python-can)
 
-You can also send UDS requests via the CANsub using [Python API](../software-tools/python.md#ref-software-python).
+You can also send UDS requests via the CANsub using [python-can](../software-tools/python.md#ref-software-python).
 
 <br/>
 
@@ -1482,7 +1844,7 @@ We recommend that you read our [CCP/XCP intro](https://www.csselectronics.com/pa
 > 
 > * [CCP/XCP A2L vs DBC files](#ccp-xcp-a2l-vs-dbc-files)
 > * [Stream CCP/XCP data (webCAN)](#stream-ccp-xcp-data-webcan)
-> * [Stream XCP data (Python)](#stream-xcp-data-python)
+> * [Stream XCP data (python-can)](#stream-xcp-data-python-can)
 >   * [Reusable connection helper](#reusable-connection-helper)
 >   * [Connect and read ECU information](#connect-and-read-ecu-information)
 >   * [Seed & key authentication](#seed-key-authentication)
@@ -1518,7 +1880,7 @@ This method is mainly recommended for short initialization sequences of up to 32
 
 ---
 
-## Stream XCP data (Python)
+## Stream XCP data (python-can)
 
 The [pyxcp](https://github.com/christoph2/pyxcp) package enables you to set up advanced XCP communication via the CANsub. In this section we provide some guidance on how to get started.
 
@@ -1526,36 +1888,31 @@ The [pyxcp](https://github.com/christoph2/pyxcp) package enables you to set up a
 
 The examples below share the same initialization code for using the CANsub with pyxcp. The subsequent examples assume this is saved as `cansub_xcp.py` next to the other scripts.
 
+#### NOTE
+This requires `pyxcp >= 0.29.10`, which resolves the `cansub` `python-can` driver by name. No custom transport adapter is needed - the helper just builds the master from config and pyxcp creates and tears down the bus itself.
+
 ```python
 import logging
-import can
-from pyxcp.transport.can import CanInterfaceBase
 from pyxcp.config import create_application_from_config
 from pyxcp.master import Master
 
-# expose the cansub bus to pyxcp's transport layer
-class CanSub(CanInterfaceBase):
-    def __init__(self, channel, bitrate, data_bitrate):
-        self.bus = can.Bus(interface="cansub", channel=channel, bitrate=bitrate, data_bitrate=data_bitrate)
-    def init(self): pass
-    def set_filters(self, filters=None): pass
-    def recv(self, timeout=None): return self.bus.recv(timeout)
-    def send(self, msg): self.bus.send(msg)
-    @property
-    def filters(self): return None
-    @property
-    def state(self): return can.BusState.ACTIVE
-    def shutdown(self): self.bus.shutdown()
-
-# build a pyxcp master bound to a cansub channel; returns (master, interface)
+# build a pyxcp master bound to a cansub channel (pyxcp owns the bus lifecycle)
+# pyxcp >= 0.29.10 resolves the "cansub" python-can driver by name - no custom adapter needed
 def make_master(channel, can_id_master, can_id_slave, bitrate, data_bitrate, fd=False, policy=None):
-    iface = CanSub(channel, bitrate, data_bitrate)
     app = create_application_from_config(
-        {"Transport": {"CAN": {"can_id_master": can_id_master, "can_id_slave": can_id_slave, "fd": fd}}},
+        {"Transport": {"CAN": {
+            "interface": "cansub",
+            "channel": channel,
+            "bitrate": bitrate,
+            "data_bitrate": data_bitrate,
+            "fd": fd,
+            "can_id_master": can_id_master,
+            "can_id_slave": can_id_slave,
+        }}},
         log_level=logging.WARNING,
     )
     app.transport.layer = "CAN"
-    return Master("CAN", config=app, policy=policy, transport_layer_interface=iface), iface
+    return Master("CAN", config=app, policy=policy)
 ```
 
 <br/>
@@ -1571,17 +1928,14 @@ CHANNEL = "1f72d84a-usb.local@1"
 CAN_ID_MASTER, CAN_ID_SLAVE = 0x111, 0x222
 BITRATE, DATA_BITRATE = 500_000, 1_000_000
 
-master, iface = make_master(CHANNEL, CAN_ID_MASTER, CAN_ID_SLAVE, BITRATE, DATA_BITRATE)
-try:
-    with master:
-        conn = master.connect()
-        print(f"connected: maxCto={conn.maxCto} maxDto={conn.maxDto} byteOrder={conn.commModeBasic.byteOrder}")
-        print(f"resources: daq={conn.resource.daq} stim={conn.resource.stim} calpag={conn.resource.calpag} pgm={conn.resource.pgm}")
-        status = master.getStatus()
-        print(f"status: daqRunning={status.sessionStatus.daqRunning} protected_daq={status.resourceProtectionStatus.daq}")
-        master.disconnect()
-finally:
-    iface.shutdown()
+master = make_master(CHANNEL, CAN_ID_MASTER, CAN_ID_SLAVE, BITRATE, DATA_BITRATE)
+with master:
+    conn = master.connect()
+    print(f"connected: maxCto={conn.maxCto} maxDto={conn.maxDto} byteOrder={conn.commModeBasic.byteOrder}")
+    print(f"resources: daq={conn.resource.daq} stim={conn.resource.stim} calpag={conn.resource.calpag} pgm={conn.resource.pgm}")
+    status = master.getStatus()
+    print(f"status: daqRunning={status.sessionStatus.daqRunning} protected_daq={status.resourceProtectionStatus.daq}")
+    master.disconnect()
 ```
 
 <br/>
@@ -1602,18 +1956,15 @@ RESOURCE_DAQ = 0x04  # the resource to unlock
 def seed_to_key(seed):
     return bytes((b ^ 0x5A) for b in seed)
 
-master, iface = make_master(CHANNEL, CAN_ID_MASTER, CAN_ID_SLAVE, BITRATE, DATA_BITRATE)
-try:
-    with master:
-        master.connect()
-        seed = bytes(master.getSeed(0, RESOURCE_DAQ).seed)
-        key = seed_to_key(seed)
-        print(f"seed={seed.hex()} -> key={key.hex()}")
-        result = master.unlock(len(key), key)
-        print(f"unlocked; still-protected: daq={result.daq} calpag={result.calpag} pgm={result.pgm}")
-        master.disconnect()
-finally:
-    iface.shutdown()
+master = make_master(CHANNEL, CAN_ID_MASTER, CAN_ID_SLAVE, BITRATE, DATA_BITRATE)
+with master:
+    master.connect()
+    seed = bytes(master.getSeed(0, RESOURCE_DAQ).seed)
+    key = seed_to_key(seed)
+    print(f"seed={seed.hex()} -> key={key.hex()}")
+    result = master.unlock(len(key), key)
+    print(f"unlocked; still-protected: daq={result.daq} calpag={result.calpag} pgm={result.pgm}")
+    master.disconnect()
 ```
 
 <br/>
@@ -1642,17 +1993,14 @@ class PrintPolicy(DaqOnlinePolicy):
 daq_list = DaqList(name="engine", event_num=0, stim=False, enable_timestamps=False, measurements=MEASUREMENTS)
 policy = PrintPolicy([daq_list])
 
-master, iface = make_master(CHANNEL, CAN_ID_MASTER, CAN_ID_SLAVE, BITRATE, DATA_BITRATE, policy=policy)
-try:
-    with master:
-        master.connect()
-        policy.setup(write_multiple=False)
-        policy.start()
-        time.sleep(5)
-        policy.stop()
-        master.disconnect()
-finally:
-    iface.shutdown()
+master = make_master(CHANNEL, CAN_ID_MASTER, CAN_ID_SLAVE, BITRATE, DATA_BITRATE, policy=policy)
+with master:
+    master.connect()
+    policy.setup(write_multiple=False)
+    policy.start()
+    time.sleep(5)
+    policy.stop()
+    master.disconnect()
 ```
 
 <br/>
@@ -1695,17 +2043,14 @@ for name in MEASUREMENTS:
 daq_list = DaqList(name="from_a2l", event_num=0, stim=False, enable_timestamps=False, measurements=daq_measurements)
 policy = PrintPolicy([daq_list])
 
-master, iface = make_master(CHANNEL, CAN_ID_MASTER, CAN_ID_SLAVE, BITRATE, DATA_BITRATE, fd=True, policy=policy)
-try:
-    with master:
-        master.connect()
-        policy.setup(write_multiple=True)
-        policy.start()
-        time.sleep(5)
-        policy.stop()
-        master.disconnect()
-finally:
-    iface.shutdown()
+master = make_master(CHANNEL, CAN_ID_MASTER, CAN_ID_SLAVE, BITRATE, DATA_BITRATE, fd=True, policy=policy)
+with master:
+    master.connect()
+    policy.setup(write_multiple=True)
+    policy.start()
+    time.sleep(5)
+    policy.stop()
+    master.disconnect()
 ```
 
 ---
@@ -1767,10 +2112,12 @@ print(f"Transmit sequence configured: {r.status_code}")
 
 # Demos
 
-This section will provide illustrative demo examples of using the CANsub via `python-can`:
+This section will provide illustrative demo examples of using the CANsub via python-can:
 
 1. [CAN-to-MQTT](demos/can2mqtt.md#ref-python-demo-can2mqtt) - forward decoded CAN data to an MQTT broker
 2. [Real-time DBC plot (Flask)](demos/cansub-plot.md#ref-python-demo-cansub-plot) - browser-based live signal plot with a Python backend
+3. [IMU attitude GUI (Qt)](demos/imu-attitude-gui.md#ref-python-demo-imu-attitude-gui) - desktop app rotating a 3D model from live IMU data
+4. [AI CAN sniffer skill (Claude Code)](demos/ai-can-sniffer.md#ref-python-demo-ai-can-sniffer) - reverse engineer proprietary CAN signals with an AI/LLM
 
 #### NOTE
 The demos are not covered by our tech support - use them mainly as starting points/inspiration
@@ -1809,7 +2156,8 @@ webCAN lets you configure both the device (e.g. bit-rates) and software (e.g. [D
 >   * [PHY settings](#phy-settings)
 >   * [Device filters](#device-filters)
 >   * [Transmit sequences](#transmit-sequences)
->   * [Export/import](#export-import)
+>   * [Save/load config as JSON](#save-load-config-as-json)
+>   * [Device time and PTP](#device-time-and-ptp)
 > * [Transport protocols](#transport-protocols)
 > * [Decode](#decode)
 
@@ -1840,9 +2188,17 @@ You can set **device CAN ID filters**. These apply on the device and are useful 
 
 You can define multi-frame transmit sequences per channel with custom period, inter-frame spacing and an optional count limit. The **DBC encoder** dialog lets you type physical signal values from assigned [DBC files](#ref-webcan-decode) (incl. PGN / multiplexing support). Sequences are deployed on the device and run with edge-based scheduling precision - independent of the host PC, network latency etc.
 
-### Export/import
+### Save/load config as JSON
 
-Device settings made in webCAN can be **exported** as a JSON configuration file<sup>[3](#export)</sup> and **re-imported** later on the same (or a different) CANsub. webCAN also accepts ‘partial’ JSON files<sup>[4](#partial)</sup>.
+Device settings made in webCAN can be **saved** as a JSON configuration file<sup>[3](#save)</sup> and **loaded** later on the same (or a different) CANsub. webCAN also accepts ‘partial’ JSON files<sup>[4](#partial)</sup>. This is done via the buttons below the ‘connect’ button.
+
+### Device time and PTP
+
+The CANsub timestamps every CAN frame, so its clock matters. The device clock resets on every power cycle<sup>[6](#timebase)</sup>, and webCAN sets it from your PC clock **once, at startup** - never mid-session, as that would shift the timestamps of frames you have already recorded.
+
+If a PTP master is present on the network, the CANsub syncs to it instead and webCAN leaves the clock alone - PTP is far more accurate than a PC clock and lets multiple CANsub devices share one time base. The header shows the state next to the device time: Green when synced, orange while syncing, grey when unavailable or off.
+
+You cannot connect a CAN channel while syncing, as the clock jumps on completion. Wait for green, or remove the PTP master if you do not want to use it<sup>[7](#ptpoff)</sup>.
 
 ---
 
@@ -1876,9 +2232,11 @@ webCAN will reject invalid DBC files - our [DBC editor](https://www.csselectroni
 ---
 * <a id='autodetect'>**[1]**</a> Auto-detection only works if your CAN bus actively broadcasts CAN frames
 * <a id='cookies'>**[2]**</a> The software settings are linked to the URL/IP you use to access your CANsub and can be cleared as normal cookies
-* <a id='export'>**[3]**</a> The exported JSON configuration file from webCAN format mirrors the CANsub REST endpoints and payloads. This makes it easy to re-use in other tools like Python
+* <a id='save'>**[3]**</a> The saved JSON configuration file from webCAN format mirrors the CANsub REST endpoints and payloads. This makes it easy to re-use in other tools like Python
 * <a id='partial'>**[4]**</a> The partial JSON files must replicate the correct JSON tree structure, but can e.g. skip subsections like specific CAN channels/settings
 * <a id='duplication'>**[5]**</a> If you assign multiple DBC files to a single CAN channel, webCAN rejects your assignment if the resulting set of DBC files have conflicting CAN IDs and/or PGNs
+* <a id='timebase'>**[6]**</a> After a power cycle the CANsub starts at its time base (2025-01-01) until a client or a PTP master sets the time
+* <a id='ptpoff'>**[7]**</a> Setting the device time manually disables PTP for the rest of the power cycle. If webCAN set the time at startup because no PTP master was visible yet, reboot the device to let it sync
 
 # index.html.md
 
@@ -1960,12 +2318,16 @@ The filter panel lets you quickly filter your data by CAN bus, ID/PGN, message n
 
 <br/>
 
-You can export the raw / [decoded](configuration.md#ref-webcan-decode) CAN data to CSV from either the summary or trace view, with the active filters controlling the output.
+You can export the raw / [decoded](configuration.md#ref-webcan-decode) CAN data to CSV from either the summary or trace view, with the active webCAN filters controlling the output.
 
-The **raw trace CSV** format is particularly useful:
+To perform an export, click the ‘download icon’ in the upper right corner of the summary/trace view panel. The summary view can be exported while the CANsub is actively streaming CAN data, while the trace view requires that you first disconnect all CAN buses.
+
+If your goal is to later re-import the exported CSV file into webCAN (or use it in e.g. python-can), make sure that you export the **raw trace view CSV**.
+
+The raw trace CSV file structure is particularly useful:
 
 1. It can be re-imported into webCAN with e.g. updated DBC decoding, TP rules etc
-2. It is supported via our [Python API](../python.md#ref-software-python) for e.g. replay or conversion to ASC, TRC, LOG, …
+2. It is supported in [python-can](../python.md#ref-software-python) for e.g. replay or conversion to ASC, TRC, MF4, …
 3. It matches the [CANedge](../../stream-data/canedge.md#ref-record-canedge) `mdf2csv` format (so CANedge log files can be loaded in webCAN)
 
 ---
@@ -1973,11 +2335,25 @@ The **raw trace CSV** format is particularly useful:
 
 # index.html.md
 
+<a id="ref-python-demo-ai-can-sniffer"></a>
+
+# AI CAN sniffer skill (Claude Code)
+
+This demo is a [Claude Code](https://www.claude.com/product/claude-code) ‘skill’ that reverse engineers proprietary CAN signals with the help of an AI/LLM - decoding e.g. speed and RPM into a ready-to-use DBC file in minutes.
+
+The main purpose is to illustrate how [python-can](../../python.md#ref-software-python) does not just power custom apps, but also enables efficient AI/LLM workflows: The skill lets the AI agent control the CANsub directly via python-can - auto-detecting the device, streaming live data and analysing it with small Python scripts (see [AI assistants](../../ai.md#ref-software-ai)).
+
+For the full write-up, including practical showcases and how to get started, see the related article:
+
+[CAN bus reverse engineering with AI](https://www.csselectronics.com/pages/can-bus-reverse-engineering-ai-llm-claude)
+
+# index.html.md
+
 <a id="ref-python-demo-can2mqtt"></a>
 
 # CAN-to-MQTT
 
-This demo forwards decoded CANsub data to an [MQTT](https://mqtt.org/) broker using `python-can` and `cantools` - e.g. for live visualization in [Grafana](https://grafana.com/).
+This demo forwards decoded CANsub data to an [MQTT](https://mqtt.org/) broker using python-can and `cantools` - e.g. for live visualization in [Grafana](https://grafana.com/).
 
 ---
 
@@ -2130,11 +2506,25 @@ Topics can e.g. be visualized in Grafana via the MQTT datasource (URI = `tcp://l
 
 This demo is a small, single-file [Flask](https://flask.palletsprojects.com/) web app that streams live data from a CANsub, DBC-decodes it and plots the selected signals in real time in your browser.
 
-The main purpose of this demo is to illustrate how quickly an AI coding assistant like Claude Code can generate a fully custom CANsub application when given the [Python API](../../python.md#ref-software-python) and the right context (see [AI assistants](../../ai.md#ref-software-ai)) - this demo was created via a single-shot prompt in this way.
+The main purpose of this demo is to illustrate how quickly an AI coding assistant like Claude Code can generate a fully custom CANsub application when given access to [python-can](../../python.md#ref-software-python) and the right context (see [AI assistants](../../ai.md#ref-software-ai)) - this demo was created via a single-shot prompt in this way.
 
 It also showcases how Flask makes it easy to build a browser-based GUI on top of a Python backend, combining the power of python-can/cantools with web tools like [uPlot](https://github.com/leeoniya/uplot) (also used in [webCAN](../../webcan.md#ref-software-webcan)). The app URL can be shared on the local network amongst a team of users.
 
 Download the demo below and follow the included `README.md` to install and run it:
 
 [`cansub-plot-demo.zip`](/_static/files/software/python/cansub-plot-demo.zip)
+
+# index.html.md
+
+<a id="ref-python-demo-imu-attitude-gui"></a>
+
+# IMU attitude GUI (PySide6/Qt)
+
+This demo is a small [PySide6](https://doc.qt.io/qtforpython/) (Qt) desktop app that streams live IMU data from a CANsub, DBC-decodes it and rotates a 3D model of the device in real time from the estimated orientation.
+
+The purpose is to illustrate how [Qt](https://www.qt.io/) can be used with [python-can](../../python.md#ref-software-python) to build highly specialized desktop-style apps - distinct from building a native C++ app on our [Qt plugin](../../custom-apps.md#ref-software-custom-apps). As with our other demos, it was created via an AI coding assistant given the right context (see [AI assistants](../../ai.md#ref-software-ai)).
+
+Download the demo below and follow the included `README.md` to install and run it:
+
+[`imu-attitude-gui-demo.zip`](/_static/files/software/python/imu-attitude-gui-demo.zip)
 

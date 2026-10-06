@@ -19,7 +19,7 @@ matplotlib>=3.8
 # --- live CANsub capture (detect_bus / capture / flask_sync) ---
 # Not needed for the offline-log workflow, but installed so the full skill works.
 python-can>=4.6.0
-python-can-cansub>=2026.6.2
+python-can-cansub>=2026.9.24
 flask>=3.0
 requests>=2.30
 

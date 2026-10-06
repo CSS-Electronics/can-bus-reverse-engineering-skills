@@ -92,6 +92,17 @@ with (can.Bus(**configs[0], bitrate=250_000, data_bitrate=1_000_000) as bus1,
     pass
 ```
 
+### Device Time
+
+On open, the device clock is compared to the host clock and set to the host time (UTC) if the two differ by more than `max_device_time_skew` seconds (default `1.0`). Pass `0.0` to always set the device clock, or `None` to never set it.
+
+> **Note:** Setting the device clock overrides and disables the device time synchronization (PTP) for the rest of the device power cycle. When using PTP, pass `max_device_time_skew=None` to leave the synchronized device clock untouched:
+
+```python
+with can.Bus(**configs[0], bitrate=250_000, data_bitrate=1_000_000, max_device_time_skew=None) as bus:
+    pass
+```
+
 ### Bit Timing
 
 `bitrate` and `data_bitrate` configure the bus with a fixed sample point of 80%. For full control of the bit timing (sample point, SJW), pass a `can.BitTiming` (classic CAN) or `can.BitTimingFd` (CAN FD) as `timing` instead. The CANsub CAN clock is 80 MHz:
@@ -170,6 +181,26 @@ with can.Bus(**configs[0], bitrate=250_000, data_bitrate=1_000_000) as bus:
     # Receive with timeout
     msg_rx = bus.recv(timeout=1.0)
     print(msg_rx)
+```
+
+#### TX Acknowledgement
+
+With `receive_own_messages=True`, the bus receives its own transmitted messages (marked with `is_rx=False`) once they have been acknowledged on the CAN bus. This tx-ack can be used to wait for a message to be transmitted before proceeding, e.g. transmitting the next message:
+
+```python
+msgs = [
+    can.Message(is_extended_id=False, arbitration_id=0x123, data=[0x01, 0x02, 0x03, 0x04]),
+    can.Message(is_extended_id=False, arbitration_id=0x123, data=[0x05, 0x06, 0x07, 0x08]),
+]
+
+with can.Bus(**configs[0], bitrate=250_000, data_bitrate=1_000_000, receive_own_messages=True) as bus:
+    for msg_tx in msgs:
+        # Transmit
+        bus.send(msg_tx)
+
+        # Wait for the tx-ack before transmitting the next message
+        msg_ack = bus.recv()
+        print(msg_ack)
 ```
 
 #### CAN FD
@@ -338,12 +369,74 @@ On Windows, `can_viewer` requires `windows-curses` (`pip install windows-curses`
 
 ### can_bridge
 
-Forward all frames received on one bus to another (e.g., to bridge two CANsub channels):
+Forward all frames received on one bus to another, in both directions. A CANsub channel can be bridged to any python-can compatible interface.
+
+#### Physical CAN buses
+
+Bridge two physical CAN buses. Frames received on either bus are transmitted on the other, with the bitrate of each bus configured independently.
+
+Any python-can compatible device connected via USB (including a CANsub device), and a CANsub connected via Ethernet:
+
+```
+    CAN bus A                                     CAN bus B
+===+=========+===                             ===+=========+===
+   |         |                                   |         |
+[node]   [device]                             [CANsub]   [node]
+             |                                   |
+             +---- usb -----+     +-- ethernet --+
+                            |     |
+                          [can_bridge]
+```
 
 ```bash
-can_bridge --bus1-interface cansub --bus1-channel aabbccdd-usb.local@1 --bus1-bitrate 250000 --bus1-data-bitrate 1000000 \
-           --bus2-interface cansub --bus2-channel aabbccdd-usb.local@2 --bus2-bitrate 250000 --bus2-data-bitrate 1000000
+can_bridge --bus1-interface INTERFACE --bus1-channel CHANNEL --bus1-bitrate 250000 \
+           --bus2-interface cansub --bus2-channel 55667788-eth.local@1 --bus2-bitrate 500000
 ```
+
+Two CANsub devices connected via Ethernet:
+
+```
+    CAN bus A                                     CAN bus B
+===+=========+===                             ===+=========+===
+   |         |                                   |         |
+[node]   [CANsub]                             [CANsub]   [node]
+             |                                   |
+             +-- ethernet --+     +-- ethernet --+
+                            |     |
+                          [can_bridge]
+```
+
+```bash
+can_bridge --bus1-interface cansub --bus1-channel 11223344-eth.local@1 --bus1-bitrate 250000 \
+           --bus2-interface cansub --bus2-channel 55667788-eth.local@1 --bus2-bitrate 500000
+```
+
+> **Warning:** To avoid loops, do not connect both ends of the bridge to the same bus, and do not enable `receive_own_messages` when both ends are CANsub devices.
+
+#### SocketCAN virtual interface
+
+Bridge CANsub channel 1 to a SocketCAN virtual interface `vcan1` (Linux), making it available to SocketCAN tools such as `candump`. The virtual side uses the `socketcan_vcan` interface (registered by this package) to keep the device timestamps of the messages. With `receive_own_messages=True`, transmission acknowledgements also appear on `vcan1`.
+
+```bash
+sudo ip link add dev vcan1 type vcan && sudo ip link set vcan1 up
+
+can_bridge --bus1-interface cansub --bus1-channel aabbccdd-usb.local@1 \
+           --bus1-bitrate 250000 --bus1-data-bitrate 1000000 \
+           --bus1-bus-kwargs receive_own_messages=True \
+           --bus2-interface socketcan_vcan --bus2-channel vcan1
+```
+
+In a separate terminal, show the frames on `vcan1`:
+
+```bash
+candump vcan1 -tA
+```
+
+> **Note:** The direction flag becomes invalid when bridging to a SocketCAN interface.
+
+> **Note:** With `receive_own_messages=True`, transmission acknowledgements appear on the vcan interface with device timestamps. Be aware that other tools on the vcan interface receive both the transmission request (host time) and the transmission acknowledgement (device time).
+
+> **Note:** `socketcan_vcan` passes the timestamps to the kernel with `SO_TXTIME`/`SCM_TXTIME`, which is not a documented use. Kernels older than Linux 5.19 ignore the timestamps.
 
 ### can_logconvert
 
