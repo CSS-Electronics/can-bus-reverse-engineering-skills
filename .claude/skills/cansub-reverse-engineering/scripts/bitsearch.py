@@ -100,18 +100,43 @@ def _extra_lsbs_continue_cascade(narrow: dict, wide: dict, rates: np.ndarray,
     (its bits show a flip-rate JUMP) or constant padding (rate ~ 0). But a wide field
     whose extra low bits simply CONTINUE the cascade (each lower bit toggles ~2x more,
     no jump, never constant) is the TRUE field whose dithering LSBs a noisy reference
-    made look like noise - so it must NOT be demoted to the narrow slice."""
-    if narrow.get("order") != "little" or wide.get("order") != "little":
+    made look like noise - so it must NOT be demoted to the narrow slice.
+    Compares DBC bit sets, so it works for any byte-order combination."""
+    wb = _field_bits(wide)                  # LSB -> MSB
+    nb = set(_field_bits(narrow))
+    lo = next((i for i, b in enumerate(wb) if b in nb), 0)
+    if lo == 0:                             # wide must extend below narrow on the LSB side
         return False
-    e_lsb, k_lsb = narrow["start_bit"], wide["start_bit"]
-    if k_lsb >= e_lsb:                      # wide must extend below narrow on the LSB side
-        return False
-    for b in range(e_lsb - 1, k_lsb - 1, -1):
-        if b + 1 >= len(rates) or rates[b] <= tiny:
+    prev = wb[lo]
+    for b in reversed(wb[:lo]):             # walk MSB -> LSB through the extra low bits
+        if b >= len(rates) or rates[b] <= tiny:
             return False                   # constant padding -> not a cascade continuation
-        if rates[b] > jump * max(rates[b + 1], tiny):
+        if rates[b] > jump * max(rates[prev], tiny):
             return False                   # a flip-rate jump -> a separate field's LSB
+        prev = b
     return True
+
+
+def _field_bits(e: dict) -> list[int]:
+    """DBC bit positions of a candidate, LSB -> MSB (Intel or Motorola)."""
+    if e["order"] == "little":
+        return list(range(e["start_bit"], e["start_bit"] + e["length"]))
+    bits, pos = [], e["start_bit"]          # Motorola: start = MSB, walk down then next byte
+    for _ in range(e["length"]):
+        bits.append(pos)
+        pos = pos + 15 if pos % 8 == 0 else pos - 1
+    return bits[::-1]
+
+
+def _nested(narrow: dict, wide: dict, rates: np.ndarray | None, tiny: float = 1e-6) -> bool:
+    """True if every VARYING bit of `narrow` lies inside `wide` (constant bits are
+    ignored). Parsimony only applies within such a nested family: a narrow read that
+    pulls in an active bit from OUTSIDE the wide field (e.g. a neighbouring flag bit
+    read as a fake LSB) is a different read, not a trimmed version of it."""
+    if rates is None:
+        return True
+    return {b for b in _field_bits(narrow) if b < len(rates) and rates[b] > tiny} \
+        <= set(_field_bits(wide))
 
 
 def _suppress_overlaps(entries: list[dict], overlap_frac: float = 0.8,
@@ -143,7 +168,7 @@ def _suppress_overlaps(entries: list[dict], overlap_frac: float = 0.8,
             inter = max(0, min(s0 + l0, s1 + l1) - max(s0, s1))
             if inter >= overlap_frac * min(l0, l1):
                 if (l0 < l1 and e["r2"] >= k["r2"] - r2_eps
-                        and e["plaus"] >= k["plaus"] - r2_eps):
+                        and e["plaus"] >= k["plaus"] - r2_eps and _nested(e, k, rates)):
                     # parsimony: a narrower equal-fitting field normally displaces the
                     # wider one (the over-wide read appended a separate field / padding).
                     # BUT do not demote a wider field whose extra LSBs CONTINUE the
@@ -503,6 +528,7 @@ def _mk(order, pos, length, r2, plaus, scale_nice=1, spear=0.99, tidy=3) -> dict
         e["start_bit"] = pos
     else:
         e["byte"] = pos
+        e["start_bit"] = pos * 8 + 7
     return e
 
 
@@ -598,6 +624,30 @@ def _selftest() -> int:
     ok &= t7
     print(f"  cascade guard allows over-wide demotion -> keep {got7} (want [5]) -> "
           f"{'OK' if t7 else 'FAIL'}")
+
+    # (8) the cascade guard also protects a BIG-ENDIAN field: a 16-bit Motorola field
+    #     (bytes 1-2, e.g. 0.25 rpm/bit RPM) must NOT be demoted to an Intel slice of
+    #     its high byte when the low byte continues the cascade.
+    rates8 = np.zeros(24)
+    for i, k in enumerate([13, 12, 11, 10, 9, 8, 23, 22, 21, 20, 19, 18, 17, 16]):   # MSB -> LSB
+        rates8[k] = min(0.5, 0.0005 * 2 ** i)
+    wide8 = _mk("big", 1, 16, 0.9945, 1.00)
+    narrow8 = _mk("little", 8, 6, 0.9938, 1.00, scale_nice=0)
+    got8 = sorted(c["length"] for c in _suppress_overlaps([wide8, narrow8], rates=rates8))
+    t8 = got8 == [16]
+    ok &= t8
+    print(f"  cascade guard keeps big-endian wide={got8} (want [16]) -> {'OK' if t8 else 'FAIL'}")
+
+    # (9) a narrow read that pulls in an ACTIVE bit from outside the wide field (a flag
+    #     bit of byte 0 read as a fake LSB: Intel 7|7) is not nested -> no parsimony swap.
+    rates9 = rates8.copy()
+    rates9[7] = 0.0002
+    swallow9 = _mk("little", 7, 7, 0.9938, 1.00, scale_nice=0)
+    got9 = sorted(c["length"] for c in _suppress_overlaps([wide8, swallow9], rates=rates9))
+    t9 = got9 == [16]
+    ok &= t9
+    print(f"  non-nested read does not displace -> keep {got9} (want [16]) -> "
+          f"{'OK' if t9 else 'FAIL'}")
 
     print("bitsearch selftest:", "PASS" if ok else "FAIL")
     return 0 if ok else 1
