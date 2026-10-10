@@ -97,7 +97,7 @@ def _extra_lsbs_continue_cascade(narrow: dict, wide: dict, rates: np.ndarray,
 
     This is the parsimony guard's discriminator. The over-wide-read failure mode the
     parsimony swap demotes is a wide read that appended a SEPARATE co-varying field
-    (its bits show a flip-rate JUMP) or constant padding (rate ~ 0). But a wide field
+    (a flip-rate JUMP or DROP) or constant padding (rate ~ 0). But a wide field
     whose extra low bits simply CONTINUE the cascade (each lower bit toggles ~2x more,
     no jump, never constant) is the TRUE field whose dithering LSBs a noisy reference
     made look like noise - so it must NOT be demoted to the narrow slice.
@@ -113,6 +113,8 @@ def _extra_lsbs_continue_cascade(narrow: dict, wide: dict, rates: np.ndarray,
             return False                   # constant padding -> not a cascade continuation
         if rates[b] > jump * max(rates[prev], tiny):
             return False                   # a flip-rate jump -> a separate field's LSB
+        if rates[b] * jump < rates[prev]:
+            return False                   # a flip-rate drop -> a neighbour's slow bit, not an LSB
         prev = b
     return True
 
@@ -648,6 +650,20 @@ def _selftest() -> int:
     ok &= t9
     print(f"  non-nested read does not displace -> keep {got9} (want [16]) -> "
           f"{'OK' if t9 else 'FAIL'}")
+
+    # (10) an extra low bit that flips far LESS than the bit above it (the slow MSB of the
+    #      field below, e.g. Hyundai i10 0x316 RPM read as 15|15) is not a genuine LSB.
+    rates10 = np.zeros(32)
+    for k in range(16, 30):
+        rates10[k] = 0.2 / 2 ** (k - 16)                   # cascade, LSB = bit 16
+    rates10[15] = 11 / 176085                               # neighbour's slow MSB
+    wide10 = _mk("little", 15, 15, 0.9869, 1.00)
+    narrow10 = _mk("little", 16, 14, 0.9869, 1.00)
+    got10 = sorted(c["length"] for c in _suppress_overlaps([wide10, narrow10], rates=rates10))
+    t10 = got10 == [14]
+    ok &= t10
+    print(f"  slow neighbour bit is not an LSB -> keep {got10} (want [14]) -> "
+          f"{'OK' if t10 else 'FAIL'}")
 
     print("bitsearch selftest:", "PASS" if ok else "FAIL")
     return 0 if ok else 1
