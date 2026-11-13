@@ -67,6 +67,28 @@ def _changing_bits(g) -> np.ndarray:
     return mask
 
 
+def _unfold_signed_straddle(le_int: np.ndarray, start: int, length: int,
+                            nbits: int) -> int | None:
+    """Unsigned length equivalent to a signed little-endian winner, else None.
+
+    An UNSIGNED field whose observed values straddle a power-of-two midpoint (e.g. a
+    +40-offset temperature, raw 97..143 around 128) reads EXACTLY as a narrower
+    SIGNED slice: the bits above that slice's sign bit are copies of it, topped by one
+    bit that is always its complement. Both decodes fit identically, so parsimony keeps
+    the narrow signed slice - which wraps as soon as the value leaves the observed
+    range. When every frame shows that copy...copy, complement pattern, return the
+    wider unsigned length (same scale, offset shifted). A genuine signed field has an
+    unrelated neighbour above it, which never matches on every frame."""
+    sign = (le_int >> (start + length - 1)) & 1
+    for k in range(start + length, nbits):
+        bit = (le_int >> k) & 1
+        if np.all(bit != sign):
+            return k - start + 1
+        if not np.all(bit == sign):
+            return None
+    return None
+
+
 def _span(entry: dict) -> tuple[int, int]:
     """Global (start_bit, length_bits) span of a candidate (LSB-first index)."""
     if entry["order"] == "little":
@@ -356,6 +378,27 @@ def main() -> int:
 
     reps = _suppress_overlaps(results, rates=rates)[:args.top]
 
+    # Signed-straddle unfold: a narrow SIGNED winner that is exactly an unsigned field
+    # straddling its midpoint is re-read as that unsigned field (see
+    # _unfold_signed_straddle). Same decode over the data, no wrap outside it.
+    if reps[0]["order"] == "little" and reps[0]["signed"]:
+        w0 = reps[0]
+        ul = _unfold_signed_straddle(g.le_int, w0["start_bit"], w0["length"], nbits)
+        if ul is not None:
+            rr = common.extract_le(g.le_int, w0["start_bit"], ul)
+            rr_fit, _ = common.auto_mask_outliers(rr, ul, t=g.t)
+            scale, offset, r2 = _fit_line(rr_fit, sampler(g.t, w0["lag_s"]))
+            pl = plausibility(rr_fit[np.isfinite(rr_fit)], ul, period_s)
+            reps[0] = {**w0, "signed": False, "length": ul, "r2": round(r2, 4),
+                       "plaus": pl["score"], "wrap_rate": pl["wrap_rate"],
+                       "scale": round(scale, 8),
+                       "scale_nice": common.scale_plausibility(scale)["nice"],
+                       "offset": round(offset, 6),
+                       "unfolded_from": f"{w0['start_bit']}|{w0['length']} signed"}
+            if not any(x["order"] == "little" and x.get("start_bit") == w0["start_bit"]
+                       and x["length"] == ul and not x["signed"] for x in results):
+                results.append(reps[0])
+
     # Resolution refinement: a field located from sparse steady holds has a reliable
     # MSB but can be under-resolved on the LSB side (a coarse high-bit slice fits the
     # same discrete hold levels). Grow the winner LSB-ward using the reference-free
@@ -465,6 +508,12 @@ def main() -> int:
             print(f"Wrote {png3c}")
 
     w = reps[0]
+    if w.get("unfolded_from"):
+        print(f"\n[unsigned] {w['unfolded_from']} -> {w['start_bit']}|{w['length']} "
+              f"unsigned: the bits above the signed slice copy its sign bit and the top "
+              f"one complements it in every frame, i.e. an unsigned field whose values "
+              f"straddle its midpoint. Same decode here; the signed slice would wrap "
+              f"outside the observed range.")
     if w.get("refined_from"):
         print(f"\n[resolution] grew the field {w['refined_from']} -> "
               f"{w['start_bit']}|{w['length']}: the extra low bits form a flip-rate "
@@ -664,6 +713,21 @@ def _selftest() -> int:
     ok &= t10
     print(f"  slow neighbour bit is not an LSB -> keep {got10} (want [14]) -> "
           f"{'OK' if t10 else 'FAIL'}")
+
+    # (11) an unsigned byte straddling 128 (raw 97..143, e.g. coolant + 40) reads exactly
+    #      as a signed 6-bit slice -> unfold to the unsigned byte; a genuine signed
+    #      6-bit field with an unrelated neighbour above it is left alone.
+    rng = np.random.default_rng(0)
+    straddle = np.array([int(v) << 8 for v in rng.integers(97, 144, 500)], dtype=object)
+    s6 = rng.integers(-20, 21, 500)
+    genuine = np.array([(int(v) & 0x3F) | (int(n) << 6)
+                        for v, n in zip(s6, rng.integers(0, 4, 500))], dtype=object)
+    u11 = _unfold_signed_straddle(straddle, 8, 6, 16)
+    g11 = _unfold_signed_straddle(genuine, 0, 6, 16)
+    t11 = u11 == 8 and g11 is None
+    ok &= t11
+    print(f"  signed-straddle unfold -> {u11} (want 8), genuine signed -> {g11} "
+          f"(want None) -> {'OK' if t11 else 'FAIL'}")
 
     print("bitsearch selftest:", "PASS" if ok else "FAIL")
     return 0 if ok else 1

@@ -26,8 +26,7 @@ from pathlib import Path
 import cantools
 
 
-def _rebuild_message(frame_id, name, is_ext, signals):
-    length = max((s.start + s.length + 7) // 8 for s in signals)
+def _rebuild_message(frame_id, name, is_ext, length, signals):
     return cantools.database.can.Message(
         frame_id=frame_id, name=name, length=length,
         is_extended_frame=is_ext, signals=signals)
@@ -43,9 +42,11 @@ def merge_databases(paths: list[Path]) -> cantools.database.Database:
                 existing = by_id[m.frame_id]
                 names = {s.name for s in m.signals}
                 kept = [s for s in existing.signals if s.name not in names]
+                # keep the observed payload length from the inputs (build_dbc writes
+                # the trace's DLC), not the extent of the signals decoded so far
                 by_id[m.frame_id] = _rebuild_message(
                     m.frame_id, existing.name, existing.is_extended_frame,
-                    kept + list(m.signals))
+                    max(existing.length, m.length), kept + list(m.signals))
             else:
                 by_id[m.frame_id] = m
     return cantools.database.Database(messages=list(by_id.values()))

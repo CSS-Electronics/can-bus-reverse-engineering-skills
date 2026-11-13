@@ -954,10 +954,12 @@ is unchanged.
   anchor/round or resolution calibration, or plotting logic.
   `python scripts/bitsearch.py --selftest` validates the overlap/parsimony ranking
   (over-wide read demotion, high-byte/wrapping-slice rejection), **that auto-masking a
-  sentinel flips the winner from a coarse slice back to the true wide field**, and
+  sentinel flips the winner from a coarse slice back to the true wide field**,
   **that the flip-rate cascade guard keeps a wide field whose extra LSBs continue the
-  cascade while still demoting a genuine over-wide read**; run it after editing
-  `_rank_key` / `_suppress_overlaps` / the masking / the cascade guard.
+  cascade while still demoting a genuine over-wide read**, and **that a narrow signed
+  slice of an unsigned field straddling its midpoint (e.g. raw 97..143 around 128) is
+  unfolded back to the unsigned field** (printed as `[unsigned] …`); run it after editing
+  `_rank_key` / `_suppress_overlaps` / the masking / the cascade guard / the unfold.
 - `flask_sync.py` is the "CANsub Reference Generator" with a **Holds | Sweep** toggle
   (`--mode both`, default; or `--mode holds` / `--mode sweep` to force one) and serves a
   vendored uPlot from `assets/` (offline, no network). **HOLDS** = settle + click each
