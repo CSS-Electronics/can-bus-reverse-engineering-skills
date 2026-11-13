@@ -846,6 +846,8 @@ is unchanged.
   motivated the sweep workflow: the true field was `correlate`'s #1, overridden by an
   "`8×0x80` = 8 gauges" story that was really eight zeroed pulse counters — and it was
   the **baseline-vs-sweep delta**, not the calm scan, that actually disambiguated.
+- **Two recordings? Identify on one, `verify` on the other.** Re-decoding a separate
+  capture of the same vehicle is the strongest check that the field isn't overfit.
 - **Show the analysis plots; use them to widen the search.** survey / correlate /
   bitsearch / build_dbc each auto-emit a polished PNG into the signal's
   `analysis-plots/` (pass `--plots-dir …/analysis-plots/`; `--no-plots` to skip).

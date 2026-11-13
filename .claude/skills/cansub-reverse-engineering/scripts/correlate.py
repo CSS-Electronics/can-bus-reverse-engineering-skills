@@ -147,15 +147,20 @@ def correlate_continuous(df, sidecar, ids, max_width, top, flagged=None, exclude
                 if score > best:
                     best, best_lag = score, lag
 
-            # signedness: re-score signed interpretation, keep better
+            # signedness: re-score signed interpretation, keep better. If signed wins,
+            # redo the lag search on the signed read so score/lag/R^2 describe the read
+            # we keep (the unsigned score collapses across a two's-complement zero-crossing)
             signed = False
             raw_s = common.apply_sign(raw, width * 8, True)
             raw_s_fit, _ = common.auto_mask_outliers(raw_s, width * 8, t=g.t)
             if not np.array_equal(raw_s, raw) and np.ptp(raw_s) > 0:
                 sig_s = common.sample_hold(g.t, raw_s_fit, grid)
-                ref_grid = sampler(grid, best_lag)
-                if _windowed_spearman(ref_grid, sig_s, N_WINDOWS) > best:
+                if _windowed_spearman(sampler(grid, best_lag), sig_s, N_WINDOWS) > best:
                     signed = True
+                    for lag in lags:
+                        score = _windowed_spearman(sampler(grid, lag), sig_s, N_WINDOWS)
+                        if score > best:
+                            best, best_lag = score, lag
 
             # reference-free plausibility + correlation sign + linear-fit R^2 for the
             # chosen read. R^2 is scale-AWARE (Spearman is monotonic/scale-free), so it
